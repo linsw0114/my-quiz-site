@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>國考典藏題庫系統 | 3505 中文圖書分類編目大意</title>
+    
+    <!-- 引入 Tailwind CSS & Vue 3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- Google Fonts: 襯線標題 + 無襯線內文 + 等寬題號 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        paper: '#FAF8F5',
+                        'paper-card': '#FFFFFF',
+                        navy: '#1A2B4C',
+                        pencil: '#2D3238',
+                        stamp: '#C83E2B',
+                        jade: '#1B7F5A',
+                        'paper-border': '#E5E0D8'
+                    },
+                    fontFamily: {
+                        serif: ['"Noto Serif TC"', 'serif'],
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #FAF8F5; font-family: 'Noto Sans TC', sans-serif; color: #1A2B4C; }
+        .font-serif-title { font-family: 'Noto Serif TC', serif; }
+        .font-mono-num { font-family: 'JetBrains Mono', monospace; }
+        
+        /* 2B 鉛筆塗黑模擬質感 */
+        .bubble-fill {
+            background: linear-gradient(135deg, #2D3238 0%, #1A1D20 100%);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+        }
+        /* 試卷質感微邊框 */
+        .paper-shadow {
+            box-shadow: 0 4px 20px -2px rgba(26, 43, 76, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+        }
+        /* 印章塗鴉特效 */
+        .stamp-badge {
+            border: 2px solid #C83E2B;
+            color: #C83E2B;
+            transform: rotate(-3deg);
+            mask-image: linear-gradient(45deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,1) 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+    <div id="app" class="flex-1 flex flex-col max-w-6xl w-full mx-auto px-4 py-6">
+        
+        <!-- 頂部 Header：考試檔案標題與控制列 -->
+        <header class="bg-paper-card border border-paper-border rounded-xl p-5 mb-6 paper-shadow">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-paper-border">
+                <div class="flex items-center gap-3">
+                    <span class="px-2.5 py-1 bg-navy text-white text-xs font-mono-num font-bold rounded">
+                        CODE {{ currentExam.code }}
+                    </span>
+                    <div>
+                        <h1 class="text-xl font-bold font-serif-title text-navy tracking-tight">
+                            {{ currentExam.title }}
+                        </h1>
+                        <p class="text-xs text-slate-500 font-mono-num mt-0.5">
+                            {{ currentExam.subtitle }} ? 全 {{ questions.length }} 題
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 題庫切換與模式按鈕 -->
+                <div class="flex items-center gap-2">
+                    <select @change="switchExam($event.target.value)" class="text-xs border border-paper-border bg-paper rounded-lg px-3 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-navy">
+                        <option v-for="bank in examList" :key="bank.id" :value="bank.id">
+                            {{ bank.name }}
+                        </option>
+                    </select>
+
+                    <div class="flex border border-paper-border rounded-lg p-0.5 bg-paper">
+                        <button @click="mode = 'practice'" :class="mode === 'practice' ? 'bg-navy text-white' : 'text-slate-600 hover:text-navy'" class="px-3 py-1 text-xs font-bold rounded-md transition">
+                            練習模式
+                        </button>
+                        <button @click="mode = 'test'" :class="mode === 'test' ? 'bg-navy text-white' : 'text-slate-600 hover:text-navy'" class="px-3 py-1 text-xs font-bold rounded-md transition">
+                            模擬測驗
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 狀態提示與快捷鍵解說 -->
+            <div class="flex flex-wrap items-center justify-between text-xs text-slate-500 pt-3 gap-2">
+                <div class="flex items-center gap-4 font-mono-num">
+                    <span>進度: <strong class="text-navy">{{ Object.keys(userAnswers).length }}</strong>/{{ questions.length }}</span>
+                    <span v-if="mode === 'practice'">正確率: <strong class="text-jade">{{ accuracy }}%</strong></span>
+                    <span class="hidden sm:inline text-slate-400">| 支援鍵盤 [A/B/C/D] 選項, [←/→] 換題</span>
+                </div>
+                <button @click="filterMistakes = !filterMistakes" :class="filterMistakes ? 'bg-stamp text-white' : 'border border-paper-border text-slate-600'" class="px-2.5 py-1 rounded font-medium transition flex items-center gap-1">
+                    <span>{{ filterMistakes ? '顯示全部題目' : '僅看錯題 (' + mistakeIds.length + ')' }}</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- 主區域：左側試題 / 右側 2B 模擬畫卡 -->
+        <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- 試題主面板 (8 Cols) -->
+            <main class="lg:col-span-8 space-y-6">
+                
+                <!-- 測驗結算印章 (模擬測驗交卷後) -->
+                <div v-if="isSubmitted" class="bg-paper-card border-2 border-navy p-6 rounded-xl paper-shadow relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 stamp-badge px-6 py-2 rounded-lg text-2xl font-bold font-serif-title pointer-events-none">
+                        {{ score >= 60 ? '及格 PASSED' : '未達標準' }}
+                    </div>
+                    <h2 class="text-lg font-bold font-serif-title text-navy mb-1">測驗結果評定</h2>
+                    <p class="text-xs text-slate-500 mb-4">系統已完成 OMR 畫卡光學閱卷</p>
+                    <div class="flex items-baseline gap-4 mb-4">
+                        <span class="text-4xl font-extrabold font-mono-num text-navy">{{ score }} <span class="text-sm font-normal">分</span></span>
+                        <span class="text-sm text-slate-600">答對 {{ correctCount }} 題 / 共 {{ questions.length }} 題</span>
+                    </div>
+                    <button @click="restartExam" class="px-4 py-2 bg-navy text-white text-xs font-bold rounded-lg hover:bg-slate-800 transition">
+                        重新試答
+                    </button>
+                </div>
+
+                <!-- 單一試題卡片 -->
+                <div v-if="currentQuestion && !isSubmitted" class="bg-paper-card border border-paper-border rounded-xl p-6 paper-shadow transition-all">
+                    <!-- 題目標頭區 -->
+                    <div class="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-100">
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono-num font-bold text-sm bg-paper border border-paper-border text-navy px-2.5 py-0.5 rounded">
+                                Q.{{ currentQuestion.id < 10 ? '0' + currentQuestion.id : currentQuestion.id }}
+                            </span>
+                            <span v-if="isBookmarked(currentQuestion.id)" class="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded border border-amber-200">
+                                ★ 已收藏
+                            </span>
+                        </div>
+                        <button @click="toggleBookmark(currentQuestion.id)" class="text-xs text-slate-400 hover:text-navy transition">
+                            {{ isBookmarked(currentQuestion.id) ? '取消收藏' : '+ 收藏此題' }}
+                        </button>
+                    </div>
+
+                    <!-- 題目本文 -->
+                    <h3 class="text-base sm:text-lg font-medium text-slate-800 leading-relaxed mb-6 font-sans">
+                        {{ currentQuestion.question }}
+                    </h3>
+
+                    <!-- 選項按鈕組 -->
+                    <div class="space-y-3 mb-6">
+                        <button 
+                            v-for="(optionText, idx) in currentQuestion.options" 
+                            :key="idx"
+                            @click="selectOption(getOptionKey(idx))"
+                            :class="getOptionClasses(getOptionKey(idx))"
+                            class="w-full text-left p-4 rounded-xl border text-sm font-medium transition-all flex items-start gap-3 group relative"
+                        >
+                            <!-- 模擬 2B 氣泡圓框 -->
+                            <span 
+                                :class="getBubbleClasses(getOptionKey(idx))"
+                                class="w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-mono-num shrink-0 transition-all mt-0.5"
+                            >
+                                {{ getOptionKey(idx) }}
+                            </span>
+                            
+                            <span class="flex-1 leading-relaxed text-slate-700 group-hover:text-navy">
+                                {{ cleanOptionText(optionText) }}
+                            </span>
+
+                            <!-- 練習模式下的答對/答錯反饋 -->
+                            <template v-if="mode === 'practice' && userAnswers[currentQuestion.id]">
+                                <span v-if="getOptionKey(idx) === currentQuestion.answer" class="text-xs font-bold text-jade shrink-0">
+                                    ? 標準答案
+                                </span>
+                                <span v-else-if="userAnswers[currentQuestion.id] === getOptionKey(idx)" class="text-xs font-bold text-stamp shrink-0">
+                                    ? 你的選擇
+                                </span>
+                            </template>
+                        </button>
+                    </div>
+
+                    <!-- 練習模式：答案詳解 -->
+                    <div v-if="mode === 'practice' && userAnswers[currentQuestion.id]" class="p-4 rounded-lg bg-paper border border-paper-border text-xs leading-relaxed space-y-1">
+                        <div class="font-bold text-navy flex items-center gap-2">
+                            <span>標準答案：</span>
+                            <span class="font-mono-num text-sm text-jade bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                {{ currentQuestion.answer }}
+                            </span>
+                        </div>
+                        <p v-if="currentQuestion.note" class="text-slate-600 pt-1">
+                            <strong>備註：</strong>{{ currentQuestion.note }}
+                        </p>
+                    </div>
+
+                    <!-- 切換按鈕導航 -->
+                    <div class="flex items-center justify-between pt-6 border-t border-slate-100 mt-6">
+                        <button 
+                            @click="prevQuestion" 
+                            :disabled="currentDisplayIndex === 0"
+                            class="px-4 py-2 border border-paper-border rounded-lg text-xs font-bold text-slate-600 disabled:opacity-30 hover:bg-paper transition"
+                        >
+                            ← 上一題
+                        </button>
+
+                        <span class="text-xs font-mono-num text-slate-400">
+                            {{ currentDisplayIndex + 1 }} / {{ activeQuestionList.length }}
+                        </span>
+
+                        <button 
+                            v-if="currentDisplayIndex < activeQuestionList.length - 1"
+                            @click="nextQuestion" 
+                            class="px-5 py-2 bg-navy text-white rounded-lg text-xs font-bold hover:bg-slate-800 transition"
+                        >
+                            下一題 →
+                        </button>
+
+                        <button 
+                            v-if="mode === 'test' && currentDisplayIndex === activeQuestionList.length - 1"
+                            @click="submitExam" 
+                            class="px-5 py-2 bg-stamp text-white rounded-lg text-xs font-bold hover:opacity-90 transition"
+                        >
+                            確認交卷
+                        </button>
+                    </div>
+                </div>
+            </main>
+
+            <!-- 右側：2B 模擬劃記卡卡槽 (4 Cols) -->
+            <aside class="lg:col-span-4 bg-paper-card border border-paper-border rounded-xl p-5 paper-shadow sticky top-6">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-paper-border">
+                    <h3 class="text-xs font-bold font-serif-title text-navy uppercase tracking-wider">
+                        OMR 2B 劃記卡 (Answer Sheet)
+                    </h3>
+                    <span class="text-xs font-mono-num text-slate-400">50 QUESTIONS</span>
+                </div>
+
+                <!-- 劃記卡號格陣列 -->
+                <div class="grid grid-cols-5 gap-2 max-h-[460px] overflow-y-auto pr-1">
+                    <button 
+                        v-for="(q, idx) in activeQuestionList" 
+                        :key="q.id"
+                        @click="jumpToQuestion(idx)"
+                        :class="getGridItemClasses(q.id, idx)"
+                        class="h-9 rounded border font-mono-num text-xs transition relative flex items-center justify-center"
+                    >
+                        <span>{{ q.id }}</span>
+                        <!-- 已作答微點小標記 -->
+                        <span v-if="userAnswers[q.id]" class="absolute bottom-1 right-1 w-1 h-1 rounded-full bg-current opacity-75"></span>
+                    </button>
+                </div>
+
+                <!-- 模擬交卷按鈕 (測驗模式) -->
+                <div v-if="mode === 'test' && !isSubmitted" class="mt-5 pt-4 border-t border-paper-border">
+                    <button @click="submitExam" class="w-full py-2.5 bg-stamp text-white text-xs font-bold rounded-lg hover:bg-red-700 transition shadow-sm">
+                        交卷計算成績
+                    </button>
+                </div>
+            </aside>
+
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted, onUnmounted } = Vue;
+
+        createApp({
+            setup() {
+                const currentExam = ref({
+                    code: '3505',
+                    title: '98年公務人員特種考試身心障礙人員考試 - 五等',
+                    subtitle: '中文圖書分類編目大意'
+                });
+
+                const examList = ref([
+                    { id: '3505_98', name: '98身障五等 - 中文圖書分類編目大意', code: '3505' },
+                    { id: '3505_99', name: '99身障五等 - 中文圖書分類編目大意 (擴充示範)', code: '3505-99' },
+                    { id: 'custom_json', name: '+ 載入外部 35 組題庫 JSON...', code: 'MORE' }
+                ]);
+
+                const mode = ref('practice');
+                const currentIndex = ref(0);
+                const userAnswers = ref({});
+                const bookmarks = ref([]);
+                const isSubmitted = ref(false);
+                const filterMistakes = ref(false);
+
+                // 從 PDF 完整提煉的 50 題題庫資料[cite: 1]
+                const questions = ref([
+                    { id: 1, question: "《中國編目規則》分成那兩大部分？", options: ["(A) 圖書與非書", "(B) 主要款目與附加款目", "(C) 著錄與標目", "(D) 記述編目與主題編目"], answer: "C" },
+                    { id: 2, question: "根據《中國機讀編目格式》，欄號「200」應著錄：", options: ["(A) 附註", "(B) 書名", "(C) 版本", "(D) 出版年"], answer: "B" },
+                    { id: 3, question: "所稱的「英美編目規則」(AACR)其原文為：", options: ["(A) Academic-Authorizing Cataloging Rules", "(B) Anthorized-American Cataloging Rules", "(C) Anglo-American Cataloging Rules", "(D) All-American Cataloging Rules"], answer: "C" },
+                    { id: 4, question: "下列何者為正確的編目工作流程？", options: ["(A) 複本查核→分類編目→處理加工→移送閱覽組", "(B) 分類編目→處理加工→複本查核→移送閱覽組", "(C) 分類編目→複本查核→處理加工→移送閱覽組", "(D) 複本查核→處理加工→分類編目→移送閱覽組"], answer: "A" },
+                    { id: 5, question: "「圖書」編目的主要著錄來源是：", options: ["(A) 封面", "(B) 書名頁", "(C) 目次頁", "(D) 書背"], answer: "B" },
+                    { id: 6, question: "ISBD 是指何種標準？", options: ["(A) 書目資訊磁帶交換標準", "(B) 圖書館營運國際標準", "(C) 分類法國際標準", "(D) 書目著錄標準"], answer: "D" },
+                    { id: 7, question: "圖書館若找不到現存的書目紀錄可供轉錄，便由專業的圖書館員自行建立，此種過程稱為：", options: ["(A) 書目建檔", "(B) 書目加工", "(C) 原始編目", "(D) 抄錄編目"], answer: "C" },
+                    { id: 8, question: "依據《中國編目規則》，唱片及錄音帶的「資料類型標示」為何？", options: ["(A) 視聽資料", "(B) 錄音資料", "(C) 非書資料", "(D) 聲音資料"], answer: "B" },
+                    { id: 9, question: "依據《中國編目規則》編目時，僧尼應以何者為作者權威標目？", options: ["(A) 法名", "(B) 本名", "(C) 筆名", "(D) 廟號"], answer: "A" },
+                    { id: 10, question: "下列何者為編目規則中「識別題名」的英文名稱？", options: ["(A) Main title", "(B) Key title", "(C) Uniform title", "(D) Identify title"], answer: "B" },
+                    { id: 11, question: "英美編目規則規定「主要款目」應以何者為主？", options: ["(A) 著者", "(B) 標題", "(C) 分類號", "(D) 正題名"], answer: "A" },
+                    { id: 12, question: "《中國圖書分類法》「教育學」類號為520，附表一「哲學」為011，若類表未有特別註明，則《教育哲學》一書之類號應為：", options: ["(A) 520.1", "(B) 520.01", "(C) 520.011", "(D) 520.11"], answer: "D" },
+                    { id: 13, question: "依據《中國編目規則》，下列外國地名何者不宜直接著錄為地名標目，而需加國名？", options: ["(A) 倫敦", "(B) 佛羅倫斯", "(C) 巴黎", "(D) 紐約"], answer: "B" },
+                    { id: 14, question: "《中國圖書分類法》類號「570.9 政治思想史 依世界分國表複分」，世界分國表「2 中國」，若書名為「中國政治思想史」，該書正確類號應為：", options: ["(A) 570.9", "(B) 570.9002", "(C) 570.902", "(D) 570.92"], answer: "D" },
+                    { id: 15, question: "《中國圖書十進分類法》編者是誰？", options: ["(A) 賴永祥", "(B) 何日章", "(C) 中國圖書館學會", "(D) 國家圖書館"], answer: "A" },
+                    { id: 16, question: "著者號、作品號、冊次號、部次號等合稱為：", options: ["(A) 登錄號", "(B) 分類號", "(C) 書號", "(D) 索書號"], answer: "C" },
+                    { id: 17, question: "《中國圖書分類法》中的總論複分表，主要乃根據資料的那一方面加以複分？", options: ["(A) 資料的大小", "(B) 資料的內容", "(C) 資料的主題", "(D) 資料的形式"], answer: "D" },
+                    { id: 18, question: "下列何者並非「連續性出版品」的特性？", options: ["(A) 有意無限期繼續出版", "(B) 刊期一定要規律", "(C) 可以是任何的媒體形式", "(D) 通常有數字或日期的編號"], answer: "B" },
+                    { id: 19, question: "圖書分類的標準可歸納為主要標準和輔助標準兩大類，下列何者通常不將其歸為主要標準？", options: ["(A) 體裁", "(B) 理論", "(C) 學術", "(D) 內容"], answer: "A" },
+                    { id: 20, question: "依據四角號碼取號，胡適的作者號為何？", options: ["(A) 4630", "(B) 4673", "(C) 4730", "(D) 4733"], answer: "C" },
+                    { id: 21, question: "醫學標題表（MeSH）的意義與功用中，不包括下列何者在內？", options: ["(A) 作為資料庫系統的控制詞彙的查詢與檢索工具", "(B) 作為醫學期刊論文主題分析之工具", "(C) 協助讀者自圖書館目錄中找到某主題的各種館藏", "(D) 用於館藏資料的分類排架"], answer: "D" },
+                    { id: 22, question: "控制詞彙是：", options: ["(A) 即為關鍵字", "(B) 被權威單位控制的詞彙，他人不可使用", "(C) 一套事先編好的主題詞表，將同一概念之主題的不同說法，選擇一個做為使用的詞彙，其他做參照", "(D) 其功用與權威控制無關"], answer: "C" },
+                    { id: 23, question: "因應編目標準的改變，下列那一項處理方式最昂貴？", options: ["(A) 既有館藏不做改變僅新進資料做改變", "(B) 所有的館藏做全部必要的改變", "(C) 既有館藏改變，新進館藏不改變", "(D) 選擇某些資料類型做改變"], answer: "B" },
+                    { id: 24, question: "下列關於標題表的主標題下之複分標題的敘述，何者錯誤？", options: ["(A) 部分複分標題屬於一般性複分，可自由用於任何主標目之下", "(B) 有論題、時代、形式及地區複分等四種形式", "(C) 關於某一論題的複分標題，稱為論題複分", "(D) 複分標題本身通常可以單獨使用"], answer: "D" },
+                    { id: 25, question: "在索引典中，A 詞 USE B 詞，下列敘述何者錯誤？", options: ["(A) B 詞 UF A 詞", "(B) 表示 A 詞與 B 詞是同義詞", "(C) 表示 A 詞與 B 詞是相關詞", "(D) 表示二者是等同關係"], answer: "C" },
+                    { id: 26, question: "NBINet 合作編目資料處理原則定有核心書目紀錄，下列有關核心書目紀錄之敘述，何者錯誤？", options: ["(A) 由書目品質控制小組訂定", "(B) 分為 CMARC 及 MARC21 標準", "(C) 分為必備項目欄及非必備項目欄位", "(D) 針對網路資源而定的核心書目紀錄"], answer: "D" },
+                    { id: 27, question: "《中國機讀權威記錄格式》主要係根據下列何種格式修訂而成？", options: ["(A) UNIMARC/Authorities", "(B) MARC21 Authority Format", "(C) USMARC Authority Format", "(D) UKMARC Authority Format"], answer: "A" },
+                    { id: 28, question: "由 OCLC 主導的 CORC 計畫是針對下列那一種類型資料的合作編目？", options: ["(A) 光碟資料", "(B) 期刊資料", "(C) 圖書資料", "(D) 網路資料"], answer: "D" },
+                    { id: 29, question: "下列有關美國標題權威合作計畫（SACO）之敘述，何者錯誤？", options: ["(A) 只有團體機構才能入會", "(B) 主題與分類號之紀錄", "(C) 參加者不需繳入會費用", "(D) 會員可推薦新的權威相關標目"], answer: "A" },
+                    { id: 30, question: "在圖書館目錄中，為維護標目的一致性及建立標目之間的參照關係，是下列那一項工作的主要目的？", options: ["(A) 主題編目", "(B) 自動化控制", "(C) 抄錄編目", "(D) 權威控制"], answer: "D" },
+                    { id: 31, question: "為達成「一館編目，多館分享」資源共享的目標，稱之為：", options: ["(A) 合作編目", "(B) 主題編目", "(C) 原始編目", "(D) 記述編目"], answer: "A" },
+                    { id: 32, question: "下列那一個選項不是書目網路？", options: ["(A) OCLC", "(B) RLIN", "(C) NBINet", "(D) ALA"], answer: "D" },
+                    { id: 33, question: "都柏林核心集（Dublin Core）針對那一欄位，定義 collection, dataset, event, image, interactive resources, service, software, sound, text 等類型？", options: ["(A) Type", "(B) Format", "(C) Relation", "(D) Coverage"], answer: "A" },
+                    { id: 34, question: "下列何者並非機讀編目格式主要的優號？", options: ["(A) 可提供多次使用", "(B) 通用於各種資訊載體之編目", "(C) 代碼部分可節省資料儲存空間", "(D) 需具編目專業背景人員才能處理"], answer: "D" },
+                    { id: 35, question: "請問在《中國機讀編目格式》中，正題名應填在那一段？", options: ["(A) 1xx 段", "(B) 2xx 段", "(C) 3xx 段", "(D) 4xx 段"], answer: "B" },
+                    { id: 36, question: "NBINet 合作編目要點中，指定中日韓圖書資料依何種分類法？", options: ["(A) 美國國會圖書館分類法", "(B) 杜威十進分類法", "(C) 中國十進圖書分類法", "(D) 中國圖書分類法"], answer: "D" },
+                    { id: 37, question: "異質性數位圖書館計畫間的互通受到重視，數位圖書館支援詮釋資料分散擷取協定是其中一項作法，請問其為下列何者？", options: ["(A) DOI 協定", "(B) ISO2709 協定", "(C) OAI-PMH 協定", "(D) EDI 協定"], answer: "C" },
+                    { id: 38, question: "MARC21 分為五大類機讀編目格式，其中有關事件、計畫、服務相關資訊，使資訊可以在公用檢索目錄上整合其他紀錄類型者為下列何格式？", options: ["(A) 分類格式（Classification Format）", "(B) 書目格式（Bibliographic Format）", "(C) 館藏格式（Holding Format）", "(D) 社群資訊格式（Community Information Format）"], answer: "D" },
+                    { id: 39, question: "下列何者是前組合式字順主題法？", options: ["(A) 單元詞法", "(B) 關鍵詞法", "(C) 標題法", "(D) 敘述詞法"], answer: "C" },
+                    { id: 40, question: "圖書館自動化系統對於權威控制及建立參照的做法中，不包括下列何者在內？", options: ["(A) 權威檔與書目檔自動連結", "(B) 權威檔與讀者檔自動連結", "(C) 人工檢查權威檔，自行維持著錄款目一致性", "(D) 擴展查詢語詞"], answer: "B" },
+                    { id: 41, question: "書目網路對書目共享與合作編目貢獻很大，下列何者不是書目網路？", options: ["(A) RLIN", "(B) OCLC", "(C) NBINet", "(D) CONCERT"], answer: "D" },
+                    { id: 42, question: "抄錄編目常參考許多來源如書目中心或線上資料庫，下列何者不在其參考之列？", options: ["(A) NBINet", "(B) EBSCOHost", "(C) OCLC PRISM", "(D) ITS MARC"], answer: "B" },
+                    { id: 43, question: "編目模組中書目資料相關的檔案為何？", options: ["(A) 訂購檔", "(B) 讀者檔", "(C) 經費檔", "(D) 權威檔"], answer: "D" },
+                    { id: 44, question: "下列何者屬於前組合的標題法？", options: ["(A) 中文圖書標題表", "(B) 漢語主題詞表", "(C) 中文主題詞表", "(D) 中國圖書分類法"], answer: "A" },
+                    { id: 45, question: "下列何者不屬於字順主題法？", options: ["(A) 標題法", "(B) 單元詞法", "(C) 敘述詞法", "(D) 引文索引法"], answer: "D" },
+                    { id: 46, question: "《中國圖書分類法》之類表上，分類員可進一步細分，如：依時代分，此種指示方式之註記稱為：", options: ["(A) 範圍註", "(B) 複分註", "(C) 入此註", "(D) 參照註"], answer: "B" },
+                    { id: 47, question: "依據《中國編目規則》第三版，作品因版本或譯本不同而題名有異者，編目時得立什麼題名並立檢索款目，使得能將作品匯集一處，以便檢索？", options: ["(A) 正題名", "(B) 副題名", "(C) 並列題名", "(D) 劃一題名"], answer: "D" },
+                    { id: 48, question: "下列何者並非編目規則中「靜畫資料」的適用範圍？", options: ["(A) 幻燈片", "(B) 顯微鏡單片", "(C) 放射線相片", "(D) 平面藝術品原件"], answer: "C" },
+                    { id: 49, question: "《中國圖書分類法》最早的編者是誰？", options: ["(A) 王雲五", "(B) 何日章", "(C) 賴永祥", "(D) 劉國鈞"], answer: "D" },
+                    { id: 50, question: "下列何書使用「甲經」、「乙史」、「丙子」、「丁集」之名，並將佛道之書歸入「子部」之「道家」，因此而確定了四部分類法？", options: ["(A) 中經新簿", "(B) 四庫全書", "(C) 隋書經籍志", "(D) 舊唐書藝文志"], answer: "C" }
+                ]);
+
+                // 計算錯題 ID 清單
+                const mistakeIds = computed(() => {
+                    return questions.value
+                        .filter(q => userAnswers.value[q.id] && userAnswers.value[q.id] !== q.answer)
+                        .map(q => q.id);
+                });
+
+                // 目前啟用的題目清單 (支援錯題過濾)
+                const activeQuestionList = computed(() => {
+                    if (filterMistakes.value) {
+                        return questions.value.filter(q => mistakeIds.value.includes(q.id));
+                    }
+                    return questions.value;
+                });
+
+                const currentDisplayIndex = computed(() => {
+                    if (currentIndex.value >= activeQuestionList.value.length) return 0;
+                    return currentIndex.value;
+                });
+
+                const currentQuestion = computed(() => activeQuestionList.value[currentDisplayIndex.value]);
+
+                // 正確率與得分計算
+                const correctCount = computed(() => {
+                    return questions.value.reduce((acc, q) => {
+                        return userAnswers.value[q.id] === q.answer ? acc + 1 : acc;
+                    }, 0);
+                });
+
+                const accuracy = computed(() => {
+                    const answeredCount = Object.keys(userAnswers.value).length;
+                    if (answeredCount === 0) return 0;
+                    return Math.round((correctCount.value / answeredCount) * 100);
+                });
+
+                const score = computed(() => Math.round((correctCount.value / questions.value.length) * 100));
+
+                // 操作邏輯
+                const getOptionKey = (idx) => ['A', 'B', 'C', 'D'][idx];
+
+                const cleanOptionText = (str) => str.replace(/^\([A-D]\)\s*/, '');
+
+                const selectOption = (optKey) => {
+                    if (isSubmitted.value) return;
+                    userAnswers.value[currentQuestion.value.id] = optKey;
+                };
+
+                const getOptionClasses = (optKey) => {
+                    const qId = currentQuestion.value.id;
+                    const selected = userAnswers.value[qId] === optKey;
+
+                    if (mode.value === 'practice' && userAnswers.value[qId]) {
+                        if (optKey === currentQuestion.value.answer) {
+                            return 'bg-emerald-50 border-emerald-400 text-emerald-950 font-semibold';
+                        }
+                        if (selected) {
+                            return 'bg-rose-50 border-rose-300 text-rose-900';
+                        }
+                    } else if (selected) {
+                        return 'bg-slate-100 border-navy text-navy font-semibold';
+                    }
+                    return 'bg-paper-card border-paper-border hover:bg-paper text-slate-700';
+                };
+
+                const getBubbleClasses = (optKey) => {
+                    const qId = currentQuestion.value.id;
+                    const selected = userAnswers.value[qId] === optKey;
+
+                    if (mode.value === 'practice' && userAnswers.value[qId]) {
+                        if (optKey === currentQuestion.value.answer) return 'bg-jade border-jade text-white';
+                        if (selected) return 'bg-stamp border-stamp text-white';
+                    }
+                    if (selected) return 'bubble-fill border-pencil text-white font-bold';
+                    return 'border-slate-300 text-slate-500 bg-white';
+                };
+
+                const getGridItemClasses = (qId, idx) => {
+                    const answered = userAnswers.value[qId];
+                    const isCurrent = idx === currentDisplayIndex.value;
+
+                    if (isCurrent) return 'ring-2 ring-navy border-navy font-bold text-navy bg-indigo-50';
+                    if (answered) {
+                        if (mode.value === 'practice') {
+                            return answered === questions.value.find(q => q.id === qId).answer 
+                                ? 'bg-emerald-50 text-emerald-800 border-emerald-300' 
+                                : 'bg-rose-50 text-rose-800 border-rose-300';
+                        }
+                        return 'bg-slate-200 text-slate-800 border-slate-300';
+                    }
+                    return 'bg-paper border-paper-border text-slate-500 hover:bg-slate-100';
+                };
+
+                const prevQuestion = () => { if (currentIndex.value > 0) currentIndex.value--; };
+                const nextQuestion = () => { if (currentIndex.value < activeQuestionList.value.length - 1) currentIndex.value++; };
+                const jumpToQuestion = (idx) => { currentIndex.value = idx; };
+
+                const toggleBookmark = (qId) => {
+                    if (bookmarks.value.includes(qId)) {
+                        bookmarks.value = bookmarks.value.filter(id => id !== qId);
+                    } else {
+                        bookmarks.value.push(qId);
+                    }
+                };
+                const isBookmarked = (qId) => bookmarks.value.includes(qId);
+
+                const submitExam = () => { isSubmitted.value = true; };
+                const restartExam = () => {
+                    userAnswers.value = {};
+                    currentIndex.value = 0;
+                    isSubmitted.value = false;
+                };
+
+                const switchExam = (bankId) => {
+                    if (bankId === 'custom_json') {
+                        alert('提示：只要將 35 組題庫存為 JSON 檔放置於 /data 目錄下，便能透過 fetch() 自動載入擴充！');
+                    }
+                };
+
+                // 鍵盤快捷鍵綁定 [A/B/C/D] / [←/→]
+                const handleKeyDown = (e) => {
+                    if (isSubmitted.value) return;
+                    const key = e.key.toUpperCase();
+                    if (['A', 'B', 'C', 'D'].includes(key)) {
+                        selectOption(key);
+                    } else if (e.key === 'ArrowLeft') {
+                        prevQuestion();
+                    } else if (e.key === 'ArrowRight') {
+                        nextQuestion();
+                    }
+                };
+
+                onMounted(() => window.addEventListener('keydown', handleKeyDown));
+                onUnmounted(() => window.removeEventListener('keydown', handleKeyDown));
+
+                return {
+                    currentExam, examList, mode, currentIndex, currentDisplayIndex, questions, activeQuestionList,
+                    currentQuestion, userAnswers, isSubmitted, filterMistakes, mistakeIds, accuracy, score,
+                    correctCount, getOptionKey, cleanOptionText, selectOption, getOptionClasses, getBubbleClasses,
+                    getGridItemClasses, prevQuestion, nextQuestion, jumpToQuestion, toggleBookmark, isBookmarked,
+                    submitExam, restartExam, switchExam
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
