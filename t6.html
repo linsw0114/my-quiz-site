@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中文圖書分類編目大意 - 歷屆試題全功能測驗系統</title>
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --primary-hover: #003d80;
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --sub-bg: #fafafa;
+            --border-color: #e0e0e0;
+            --control-bg: #e9ecef;
+            --option-hover: #f0f0f0;
+            --correct-color: #28a745;
+            --correct-bg: #e8f5e9;
+            --incorrect-color: #dc3545;
+            --incorrect-bg: #ffebee;
+        }
+
+        body.dark-mode {
+            --primary-color: #378add;
+            --primary-hover: #1e62a8;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --sub-bg: #2a2a2a;
+            --border-color: #3a3a3a;
+            --control-bg: #2c2c2c;
+            --option-hover: #383838;
+            --correct-color: #4caf50;
+            --correct-bg: #1b3823;
+            --incorrect-color: #f44336;
+            --incorrect-bg: #3d1c1d;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            transition: background-color 0.3s;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: var(--control-bg);
+            padding: 18px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .select-group-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .select-group {
+            flex: 1;
+            min-width: 250px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .select-group label {
+            white-space: nowrap;
+        }
+
+        select {
+            width: 100%;
+            font-size: 15px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        button.btn-tool {
+            flex: 1;
+            min-width: 120px;
+            font-size: 15px;
+            padding: 10px 14px;
+            border-radius: 6px;
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        button.btn-tool:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button.btn-tool:active {
+            transform: scale(0.98);
+        }
+
+        button.btn-toggle-active {
+            background-color: #6c757d;
+        }
+
+        .score-board {
+            display: none;
+            padding: 15px;
+            background: var(--control-bg);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .question-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: var(--sub-bg);
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .question-title {
+            font-size: 17px;
+            font-weight: bold;
+            margin-bottom: 14px;
+            line-height: 1.5;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .option-item {
+            margin-bottom: 8px;
+            padding: 12px;
+            border-radius: 6px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-item:hover {
+            background-color: var(--option-hover);
+        }
+
+        .option-item input {
+            margin-right: 12px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        .option-item label {
+            cursor: pointer;
+            width: 100%;
+            line-height: 1.4;
+        }
+
+        /* 答題回饋樣式 */
+        .question-card.correct {
+            border-left: 6px solid var(--correct-color);
+            background-color: var(--correct-bg);
+        }
+
+        .question-card.incorrect {
+            border-left: 6px solid var(--incorrect-color);
+            background-color: var(--incorrect-bg);
+        }
+
+        .option-item.opt-correct-highlight {
+            border-color: var(--correct-color);
+            background-color: var(--correct-bg);
+            font-weight: bold;
+        }
+
+        .option-item.opt-incorrect-highlight {
+            border-color: var(--incorrect-color);
+            background-color: var(--incorrect-bg);
+        }
+
+        .answer-feedback {
+            margin-top: 12px;
+            font-weight: bold;
+            display: none;
+            line-height: 1.5;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            background-color: var(--correct-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            display: none; /* 考試模式下才會顯示 */
+        }
+
+        .btn-submit:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>中文圖書分類編目大意 試題測驗系統</h1>
+
+    <div class="controls">
+        <div class="select-group-container">
+            <div class="select-group">
+                <label for="mode-select"><b>測驗模式：</b></label>
+                <select id="mode-select" onchange="resetQuiz()">
+                    <option value="practice">📖 練習模式（點擊即時顯示答案）</option>
+                    <option value="exam">📝 考試模式（一次交卷計分）</option>
+                </select>
+            </div>
+            <div class="select-group">
+                <label for="exam-select"><b>選擇試題：</b></label>
+                <select id="exam-select" onchange="resetQuiz()">
+                    <option value="1510_98">98年 公務人員初等考試（代號：1510）</option>
+                    <option value="3511_98">98年 地方政府公務人員考試五等（代號：3511）</option>
+                    <option value="3512_99">99年 地方政府公務人員考試五等（代號：3512）</option>
+                    <option value="3507_100">100年 身心障礙人員考試五等（代號：3507）</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-tool" onclick="shuffleQuestions()">🎲 隨機題目</button>
+            <button class="btn-tool" id="btn-shuffle-opts" onclick="toggleShuffleOptions()">🔀 打亂選項</button>
+            <button class="btn-tool" onclick="toggleDarkMode()">🌙 切換深色模式</button>
+            <button class="btn-tool" onclick="resetQuiz()">🔄 重新開始</button>
+        </div>
+    </div>
+
+    <div id="score-board" class="score-board"></div>
+
+    <div id="quiz-container"></div>
+
+    <button id="submit-btn" class="btn-submit" onclick="gradeQuiz()">交卷 / 計算成績</button>
+</div>
+
+<script>
+const EXAM_DATABASE = {
+    "1510_98": {
+        title: "98年 公務人員初等考試試題 - 中文圖書分類編目大意",
+        questions: [
+            { id: 1, question: "1 抄錄編目有許多來源，下列何者非為抄錄編目資源？", options: ["(A) ISBNnet", "(B) SinoCat", "(C) NBINet", "(D) BINET"], answer: "D" },
+            { id: 2, question: "2 民國86年《中國機讀編目格式》第四版主要增加那個欄位？", options: ["(A) 854欄位", "(B) 855欄位", "(C) 856欄位", "(D) 857欄位"], answer: "C" },
+            { id: 3, question: "3 圖書館提供給讀者查詢館藏的工具稱為：", options: ["(A) 目錄", "(B) 引用文獻", "(C) 年鑑", "(D) 名錄"], answer: "A" },
+            { id: 4, question: "4 將書目紀錄依照既定的標準加以組織或編排，以利檢索的過程稱為：", options: ["(A) 書目查詢", "(B) 書目控制", "(C) 圖書加工", "(D) 書目整合"], answer: "B" },
+            { id: 5, question: "5 下列那一項資料不包括在ISO2709中？", options: ["(A) 指引", "(B) 目錄", "(C) XML語法", "(D) 書目資料內容"], answer: "C" },
+            { id: 6, question: "6 我國大多數圖書館的中文資料使用下列何者做為主題編目時取分類號的參考？", options: ["(A) 中國圖書分類法", "(B) 中國圖書十進分類法", "(C) 現代圖書分類法", "(D) 中國圖書館分類法"], answer: "A" },
+            { id: 7, question: "7 中文圖書進行抄錄編目時，書目資料透過何種管道查詢為優先？", options: ["(A) NBINet", "(B) 網路書店", "(C) 搜尋引擎", "(D) 其他圖書館目錄"], answer: "A" },
+            { id: 8, question: "8 下列那一項工作不屬於資訊組織的工作範疇？", options: ["(A) 敘述著錄", "(B) 館藏發展", "(C) 主題分析", "(D) 權威控制"], answer: "B" },
+            { id: 9, question: "9 下列何者並非英美編目規則（AACR2）的出版者？", options: ["(A) 美國圖書館協會", "(B) 英國圖書館協會", "(C) 紐西蘭圖書館協會", "(D) 加拿大圖書館協會"], answer: "C" },
+            { id: 10, question: "10 圖書館對於每一部書進行外觀的描述稱為：", options: ["(A) 分類", "(B) 參考", "(C) 數位化", "(D) 記述編目"], answer: "D" },
+            { id: 11, question: "11 《中國編目規則》中規範書目資料著錄項目之多寡者，稱為：", options: ["(A) 標點符號", "(B) 著錄層次", "(C) 著錄順序", "(D) 照錄原則"], answer: "B" },
+            { id: 12, question: "12 關於「著者敘述」的著錄規則，下列敘述何者錯誤？", options: ["(A) 當主要著錄來源上記載的著者有錯誤時，仍應照樣著錄", "(B) 同一種著作方式的著者若超過三人以上，只要著錄第一位著者，並加「等」字即可", "(C) 主要著錄來源中關於著者的頭銜、學位、職位等均需要照樣著錄", "(D) 著作方式相同的著者以「，」分隔，不同著作方式的著者以「；」分隔"], answer: "C" },
+            { id: 13, question: "13 下列那些資料不屬於編目資料的稽核項？", options: ["(A) 出版年", "(B) 插圖", "(C) 高度、尺寸", "(D) 面、葉、冊"], answer: "A" },
+            { id: 14, question: "14 下列何者在組織資訊時最不適合被選擇為檢索點？", options: ["(A) 人名", "(B) 題名", "(C) 出版者", "(D) 高廣尺寸"], answer: "D" },
+            { id: 15, question: "15 依據《中國編目規則》，選擇劃一題名時，下列何者在順序上應列為第一？", options: ["(A) 正題名", "(B) 原題名", "(C) 作品中最常使用之題名", "(D) 最為著稱之題名"], answer: "D" },
+            { id: 16, question: "16 在《中國圖書分類法》中，何謂「插表」？下列敘述何者錯誤？", options: ["(A) 是複分表的一種", "(B) 是一種通用複分表", "(C) 複分表插編於分類表正文當中", "(D) 有表譜形式及仿分形式"], answer: "B" },
+            { id: 17, question: "17 下列敘述中，何者較不符合圖書分類的基本原則？", options: ["(A) 圖書分類應歸入最切合其內容的類", "(B) 圖書內容涉及兩個主題即歸入總類", "(C) 圖書分類應歸入有最大用途的類", "(D) 圖書分類應依據作者的寫作意旨分類"], answer: "B" },
+            { id: 18, question: "18 《中國圖書分類法》的「總論複分表」使用範圍為何？", options: ["(A) 限於總類", "(B) 限於有總論字樣者", "(C) 全表各類目", "(D) 限於史地類"], answer: "C" },
+            { id: 19, question: "19 中國圖書分類法中「群經」之分類方式有那兩種？各經入各類 各經入總類之 090 各經入史地類 各經入文學類", options: ["(A) ", "(B) ", "(C) ", "(D) "], answer: "A" },
+            { id: 20, question: "20 中國圖書分類法類號「494.01企業效率」，若書名為「企業管理的理論與哲學」，該書正確類號應為：", options: ["(A) 494", "(B) 494.1", "(C) 494.01", "(D) 494.001"], answer: "D" },
+            { id: 21, question: "21 一書的索書號如為023.3/8454，其中8454代表什麼？", options: ["(A) 分類號", "(B) 作品號", "(C) 著者號", "(D) 登錄號"], answer: "C" },
+            { id: 22, question: "22 下列何種分類法將語言與文學隔開，分置兩大類？", options: ["(A) 展開式分類法", "(B) 中國圖書分類法", "(C) 杜威十進分類法", "(D) 美國國會圖書館分類法"], answer: "C" },
+            { id: 23, question: "23 依據《中國機讀編目格式》稽核項的欄位是：", options: ["(A) 200", "(B) 215", "(C) 225", "(D) 300"], answer: "B" },
+            { id: 24, question: "24 國立中央圖書館著者碼編製規則簡稱：", options: ["(A) 四角號碼法", "(B) 五筆檢字法", "(C) 拼音著者號碼法", "(D) 漢語拼音法"], answer: "B" },
+            { id: 25, question: "25 相關索引為何人所創？", options: ["(A) 杜威（Melvil Dewey）", "(B) 賴永祥", "(C) 何日章", "(D) 阮甘那桑（S. R. Ranganathan）"], answer: "A" },
+            { id: 26, question: "26 主題分析中的系統主題法的涵義通常是指：", options: ["(A) 分類法", "(B) 標題表", "(C) 索引典", "(D) 權威檔"], answer: "A" },
+            { id: 27, question: "27 《中文主題詞表》的主表排列方式為：", options: ["(A) 圖形式", "(B) 字順式", "(C) 層面式", "(D) 分類式"], answer: "B" },
+            { id: 28, question: "28 標題表中，由「不使用的款目詞」引見「使用的款目詞」之參照方式是：", options: ["(A) 見", "(B) 反見", "(C) 參見", "(D) 反參見"], answer: "A" },
+            { id: 29, question: "29 標題應該涵蓋一本書的主題範圍，不大也不小，稱之：", options: ["(A) 款目的直接性", "(B) 款目的多樣性", "(C) 款目的間接性", "(D) 款目的專指性"], answer: "D" },
+            { id: 30, question: "30 何種字順主題法之詞間關係結構較為明確、完善？", options: ["(A) 索引典", "(B) 標題表", "(C) 主題詞表", "(D) 分類表"], answer: "A" },
+            { id: 31, question: "31 我國的NBINet目前使用的系統是：", options: ["(A) T2", "(B) INNOPAC", "(C) Horizon", "(D) Spydus"], answer: "B" },
+            { id: 32, question: "32 依據中國編目規則，選擇標目時，西洋人之中譯名以何者為主要標目？", options: ["(A) 姓", "(B) 名", "(C) 國名", "(D) 生卒年"], answer: "A" },
+            { id: 33, question: "33 李叔同法名「弘一法師」，分別在文學、藝術與佛學領域皆富盛名，在圖書館權威目錄參照模式中如何用以指引使用者查尋其所有相關作品？", options: ["(A) 「參見」款目", "(B) 「說明參見」款目", "(C) 「見」款目", "(D) 「反見」款目"], answer: "A" },
+            { id: 34, question: "34 依據《中國機讀權威紀錄格式》，2XX段是：", options: ["(A) 見標目", "(B) 參見標目", "(C) 權威標目", "(D) 反參見標目"], answer: "C" },
+            { id: 35, question: "35 編目時用以維護目錄品質及其一致性的主要工具為何？", options: ["(A) 書目檔", "(B) 權威檔", "(C) 館藏檔", "(D) 交贈檔"], answer: "B" },
+            { id: 36, question: "36 我國的機讀權威紀錄格式，主要是參考下列何種機讀格式？", options: ["(A) 美國機讀權威格式（USMARC Format for Authority Data）", "(B) 國際機讀權威格式（UNIMARC Format for Authorities）", "(C) 中國大陸的中國機讀規範格式", "(D) 自行發展"], answer: "B" },
+            { id: 37, question: "37 出版者在新書出版前，將樣書或書名頁等相關資料送請國家圖書館編目，並於版權頁印出書目資料，此資料稱為：", options: ["(A) BIP資料", "(B) CPI資料", "(C) CIP資料", "(D) BPI資料"], answer: "C" },
+            { id: 38, question: "38 若一書有不同的版本，編目時應如何處理？", options: ["(A) 重新當一筆新的記錄編目", "(B) 視同複本書，只要在原來的目錄上加上複本書的登錄號即可", "(C) 視同複本書，索書號與第一本書完全一致", "(D) 加於稽核項，以附件處理"], answer: "A" },
+            { id: 39, question: "39 杜威分類法（DDC）其原文為：", options: ["(A) Dewey Division Classification", "(B) Disciplinary Division Classification", "(C) Document Delivery Classification", "(D) Dewey Decimal Classification"], answer: "D" },
+            { id: 40, question: "40 IFLA FRBR之作品模式有四大層次，下列何者不包括在內？", options: ["(A) 作品Work", "(B) 內容版本Expressions", "(C) 載體版本Manifestation", "(D) 辨識Identification"], answer: "D" },
+            { id: 41, question: "41 下列何者不是詮釋資料（metadata）格式？", options: ["(A) Dublin Core", "(B) Encoding Archival Description", "(C) CMARC", "(D) DOI"], answer: "D" },
+            { id: 42, question: "42 下列何者不包括在中國機讀編目格式中「指引」範圍內：", options: ["(A) 欄號", "(B) 資料欄位長度", "(C) 首字位址", "(D) 記錄長度"], answer: "D" },
+            { id: 43, question: "43 CCCII是代表下列何者？", options: ["(A) 中文主題詞表", "(B) 中文資訊交換碼", "(C) 國際標準叢刊代碼", "(D) 國際標準期刊號"], answer: "B" },
+            { id: 44, question: "44 中國機讀編目格式的「欄號」（tag number）的表示方式為何？", options: ["(A) 兩位數字", "(B) 三位數字", "(C) 數字及字母共三位", "(D) 三個字母"], answer: "B" },
+            { id: 45, question: "45 何者為整合性圖書館自動化系統中核心檔案，支持圖書館所有作業進行，包括採訪、編目、期刊處理、流通、線上公用目錄及參考服務暨文獻傳遞等？", options: ["(A) 代碼檔", "(B) 書目檔", "(C) 權威檔", "(D) 館藏檔"], answer: "B" },
+            { id: 46, question: "46 線上電子資料庫係指儲存在遠端之資料庫，隨著資訊科技進步其種類發展越多，下列何者不在其範圍內？", options: ["(A) 電子書", "(B) 電子期刊", "(C) 隨身碟資料", "(D) 電子百科全書"], answer: "C" },
+            { id: 47, question: "47 在圖書館合作編目活動中，聯合目錄扮演重要角色，下列何者為台灣地區圖書館的館藏聯合目錄？", options: ["(A) 全國新書資訊網", "(B) 全國圖書書目資訊網", "(C) 台灣學術網路", "(D) 全國博碩士論文系統"], answer: "B" },
+            { id: 48, question: "48 《中國機讀編目格式》欄號805所記載的內容為何？", options: ["(A) 題名項", "(B) 出版項", "(C) 集叢項", "(D) 館藏紀錄"], answer: "D" },
+            { id: 49, question: "49 利用現成的編目資料予以轉錄或修改的編目方式，稱為：", options: ["(A) 原始編目", "(B) 記述編目", "(C) 抄錄編目", "(D) 主題編目"], answer: "C" },
+            { id: 50, question: "50 圖書館在更換自動化系統時，可能移轉的檔案有很多，下列何者可以考慮不轉移，而在新系統重新建立？", options: ["(A) 流通資料", "(B) 書目資料", "(C) 館藏資料", "(D) 讀者資料"], answer: "A" }
+        ]
+    },
+    "3511_98": {
+        title: "98年 地方政府公務人員考試五等試題 - 中文圖書分類編目大意",
+        questions: [
+            { id: 1, question: "1 請問在四庫分類法中，藝術應入那一類？", options: ["(A) 經部", "(B) 史部", "(C) 子部", "(D) 集部"], answer: "C" },
+            { id: 2, question: "2 何謂權威控制？", options: ["(A) 可控制檢索款目的一致性，並建立參照關係", "(B) 指由權威單位所編的書目紀錄", "(C) 指由中央主管機關所做的控制工作", "(D) 指最具權威的書目資料"], answer: "A" },
+            { id: 3, question: "3 雖有各種機讀編目格式，但其交換格式結構皆以下列何者為基礎？", options: ["(A) CCCII", "(B) ISO 39.2", "(C) ISO 2709", "(D) Z 39.50"], answer: "C" },
+            { id: 4, question: "4 依據《中國編目規則》及《中國機讀編目格式》，下列會議名稱及其屆次年代之檢索款目，何者正確？", options: ["(A) 700 02 $a全國圖書館業務會議$d（1$f民國61$e臺北市）", "(B) 702 12 $a全國圖書館業務會議$d（1$f民國61$e臺北市）", "(C) 710 02 $a全國圖書館業務會議$d（1$f民國61$e臺北市）", "(D) 710 12 $a全國圖書館業務會議$d（1$f民國61$e臺北市）"], answer: "D" },
+            { id: 5, question: "5 在《中國機讀編目格式》中，下列那一項資料中表示某一欄位是否做索引？", options: ["(A) 欄位代碼", "(B) 指標", "(C) 分欄代碼", "(D) 標點符號"], answer: "B" },
+            { id: 6, question: "6 IFLA FRBR研究重新定義四種書目紀錄的功能需求，其中那一項已超出克特（Charles Cutter）早期所探討的目錄功能？", options: ["(A) 使用書目紀錄去找尋符合使用者查尋條件的資料（to find）", "(B) 利用檢索的書目紀錄去辨識某一資料（to identify）", "(C) 使用書目紀錄去選擇使用者適用的資料（to select）", "(D) 使用書目紀錄讓使用者去獲得該資料（to obtain）"], answer: "D" },
+            { id: 7, question: "7 異質系統書目資料交換時會產生字碼問題，英文字集多採下列何者？", options: ["(A) REACC", "(B) ASCII", "(C) CCCII", "(D) BIG5"], answer: "B" },
+            { id: 8, question: "8 《中國機讀編目格式》的那一版本開始刪除4XX連接款目段？", options: ["(A) 第一版", "(B) 第二版", "(C) 第三版", "(D) 第四版"], answer: "D" },
+            { id: 9, question: "9 任何一種學科的書籍，均具有物質形式，此種形式又有外型與內型之分，外型通常是指：", options: ["(A) 一個學科的字辭典或期刊", "(B) 一個學科的原理或哲學", "(C) 一個學科的教學方法", "(D) 一個學科的歷史"], answer: "A" },
+            { id: 10, question: "10 中國圖書分類法複分表「中國時代表」中的現代及民國之代碼為何？", options: ["(A) 5", "(B) 6", "(C) 7", "(D) 8"], answer: "D" },
+            { id: 11, question: "11 1996年，OCLC宣布NetFirst資料庫計畫，其目的是提供網路使用者簡單實用工具來協助其較易探索網路資源，資料庫收集對象不包括下列何者？", options: ["(A) 電子期刊", "(B) 部落格", "(C) 圖書館目錄", "(D) 全球資訊網首頁"], answer: "B" },
+            { id: 12, question: "12 索引典與標題表之異同比較，下述何者正確？", options: ["(A) 索引典發展較早", "(B) 標題表沒有複分", "(C) 索引典沒有複分", "(D) 索引典術語較廣義"], answer: "C" },
+            { id: 13, question: "13 主題編目是指對資料的那一部分做分析？", options: ["(A) 高廣", "(B) 內容", "(C) 著者", "(D) 外觀"], answer: "B" },
+            { id: 14, question: "14 目前大多數地區例如美、加、澳、星、馬等地圖書館的中文譯音符號系統以何者為主？", options: ["(A) 〝韋妥瑪式〞羅馬拼音", "(B) 〝韋傑式〞羅馬拼音", "(C) 〝漢語拼音〞", "(D) 〝通用拼音〞"], answer: "C" },
+            { id: 15, question: "15 直到目前為止，下列何者尚無標準？", options: ["(A) OPAC的整合性檢索", "(B) OPAC的展示方式", "(C) OPAC的書目著錄方式", "(D) OPAC的書目交換方式"], answer: "B" },
+            { id: 16, question: "16 NBINet是屬於下列何者？", options: ["(A) 亞洲地區聯合目錄", "(B) 全球性聯合目錄", "(C) 臺灣地區聯合目錄", "(D) 華文地區聯合目錄"], answer: "C" },
+            { id: 17, question: "17 OPAC的意義為何？", options: ["(A) 光碟資料庫", "(B) 圖書館自動化系統", "(C) 書目資訊磁帶交換格式", "(D) 線上公共目錄"], answer: "D" },
+            { id: 18, question: "18 ISBN的第一組號碼是代表：（備註：考選部更正答A或B均給分）", options: ["(A) 國際", "(B) 國家", "(C) 出版社", "(D) 作者"], answer: "A" },
+            { id: 19, question: "19 依據《中國編目規則》，連續性出版品的題名如果有改變，應選擇下列何者著錄為正題名？", options: ["(A) 舊題名", "(B) 出版機構", "(C) 新題名", "(D) 團體作者"], answer: "C" },
+            { id: 20, question: "20 依據《中國編目規則》，關於「並列題名」的著錄，下列敘述何者錯誤？", options: ["(A) 與正題名意義相同但不同語文之題名", "(B) 所有的著錄層次都應著錄所有的並列題名", "(C) 翻譯作品沒有附原文者，主要著錄來源中的原題名應在附註項中著錄", "(D) 並列題名是以「 ＝ 」引出，著錄於正題名之後"], answer: "B" },
+            { id: 21, question: "21 依據《中國編目規則》，關於連續性出版品之「主要著錄來源」，下列敘述何者錯誤？", options: ["(A) 為首期的書名頁", "(B) 若無書名頁，則可選用版權頁替代之", "(C) 若圖書館中沒有首期，則依館藏有的任一期來著錄", "(D) 主要著錄來源不是首期的書名頁時，皆應在附註項中說明"], answer: "C" },
+            { id: 22, question: "22 依據《中國編目規則》，資料特殊細節項不適用於下列那一種資料類型？", options: ["(A) 圖書", "(B) 連續性出版品", "(C) 樂譜", "(D) 地圖資料"], answer: "A" },
+            { id: 23, question: "23 依據《中國編目規則》的規範，單冊圖書若僅印刷一面時，以下列何者為其數量單位？", options: ["(A) 頁", "(B) 葉", "(C) 面", "(D) 張"], answer: "B" },
+            { id: 24, question: "24 書名頁題編著者為吳靜吉、丁興祥、朱進財、王敬仁、張守泰。依據《中國編目規則》，其著者敘述應如何著錄？", options: ["(A) 吳靜吉等", "(B) 吳靜吉等著", "(C) 吳靜吉等編著", "(D) 吳靜吉、丁興祥、朱進財、王敬仁、張守泰"], answer: "C" },
+            { id: 25, question: "25 一書含有多種主題，在選擇類號時，則下列敘述何者錯誤？", options: ["(A) 主題互有關係時，通常歸入受到影響的主題", "(B) 主題互有關係時，通常歸入產生影響的主題", "(C) 主題屬並列關係時，通常歸入排列在前的主題", "(D) 主題屬並列關係時，通常歸入篇幅較多的主題"], answer: "B" },
+            { id: 26, question: "26 依據《中國編目規則》，團體標目著錄地名之目的，下列敘述何者錯誤？", options: ["(A) 區別相同名稱的團體", "(B) 做為政府機構標目的一部分", "(C) 說明會議或展覽會舉行的地點", "(D) 表示「出版地」"], answer: "D" },
+            { id: 27, question: "27 《中國圖書分類法》增訂八版於民國90年出版，增訂八版以後的修訂維護工作授權下列那一個單位負責？", options: ["(A) 國立編譯館", "(B) 國家圖書館", "(C) 國立教育資料館", "(D) 國立臺灣大學圖書館"], answer: "B" },
+            { id: 28, question: "28 陳壽著《三國志》應分類於：", options: ["(A) 傳記類", "(B) 中國小說類", "(C) 中國歷史類", "(D) 軍事類"], answer: "C" },
+            { id: 29, question: "29 索書號通常由下列那四種號碼組成？", options: ["(A) 分類號、著者號、登錄號、特藏號", "(B) 分類號、著者號、作品號、特藏號", "(C) 分類號、著者號、作品號、登錄號", "(D) 分類號、作品號、特藏號、登錄號"], answer: "B" },
+            { id: 30, question: "30 杜威十進分類法的900類目為何？", options: ["(A) 美術", "(B) 語文", "(C) 地理及歷史", "(D) 社會科學"], answer: "C" },
+            { id: 31, question: "31 《中國圖書分類法》一書，如依該法分類，應歸入那一類？", options: ["(A) 總類", "(B) 社會科學類", "(C) 應用科學類", "(D) 語文類"], answer: "A" },
+            { id: 32, question: "32 根據《中國圖書分類法》分類時，若依附表一「總論複分表」於類號後面加05，則此資料應為：", options: ["(A) 辭典；類書", "(B) 期刊；雜誌", "(C) 雜文；演講錄", "(D) 叢書"], answer: "B" },
+            { id: 33, question: "33 若以四角號碼取作者號，請問作家林良作者號的「林」這個字的號碼應為？", options: ["(A) 44", "(B) 55", "(C) 22", "(D) 11"], answer: "A" },
+            { id: 34, question: "34 如果一圖書館的線上目錄有做作者權威控制，而蘇東坡乃以蘇軾為權威款目，則系統應如何處理？", options: ["(A) 讓使用者只能用蘇軾查尋", "(B) 讓使用者只能用蘇東坡查尋", "(C) 讓使用者用蘇軾及蘇東坡都可以查尋", "(D) 讓使用者用蘇軾以外之其他別名才能查尋"], answer: "C" },
+            { id: 35, question: "35 下列關於族首詞（Top Term）的敘述，何者正確？", options: ["(A) 族首詞有上位詞", "(B) 是概念外延最多的描述詞", "(C) 實際檢索價值很大", "(D) 族首詞沒有下位詞"], answer: "B" },
+            { id: 36, question: "36 關於中西文之重要標題表的敘述，下列何者錯誤？", options: ["(A) 席爾氏標題表廣為美國小型公共與學校圖書館所採用", "(B) 美國國家醫學圖書館醫學標題表經常更新內容", "(C) 美國國會圖書館標題表為美國學術及中、大型圖書館普遍採用", "(D) 漢語主題詞表是大陸目前規模最大的分類主題一體化詞表"], answer: "D" },
+            { id: 37, question: "37 下列何者屬於主題標目的「限定形式標目」款目詞形式？", options: ["(A) 植物染（臺灣）", "(B) 中國－歷史", "(C) 地理資訊系統", "(D) 圖書與資訊"], answer: "A" },
+            { id: 38, question: "38 索引典代表符號有兩種，下列何者不屬於參照（Cross Reference）？", options: ["(A) see", "(B) see also", "(C) x", "(D) SN（Scope Note）"], answer: "D" },
+            { id: 39, question: "39 下列何者屬於前組合的字順主題法？", options: ["(A) 中文主題詞表", "(B) 中文圖書標題表", "(C) 漢語主題詞表", "(D) 中國圖書分類法"], answer: "B" },
+            { id: 40, question: "40 《中國機讀權威紀錄格式》可以處理何種語文的權威紀錄？", options: ["(A) 只能處理中文", "(B) 只能處理中、日、韓文", "(C) 只能處理中文及英文", "(D) 任何語文皆可"], answer: "D" },
+            { id: 41, question: "41 下列何者並非《中國機讀權威紀錄格式》涵蓋著錄類型？", options: ["(A) 書目紀錄", "(B) 權威紀錄", "(C) 參照紀錄", "(D) 說明參照紀錄"], answer: "A" },
+            { id: 42, question: "42 下列有關NBINet之中文名稱權威資料庫之敘述，何者正確？", options: ["(A) 系統僅提供一種轉出格式", "(B) 資料內容僅有中文人名一種", "(C) 輸出內碼僅提供BIG5一種", "(D) 僅合作編目之合作館才能使用"], answer: "D" },
+            { id: 43, question: "43 美國國會圖書館合作編目計畫（PCC）之下有一個名稱權威合作計畫，其簡稱為何？", options: ["(A) NACO", "(B) SACO", "(C) BIBCO", "(D) CONSER"], answer: "A" },
+            { id: 44, question: "44 OCLC的CORC計畫主要是試驗以MARC和metadata編目何種資源的優劣？", options: ["(A) 地圖資源", "(B) 錄音資源", "(C) 微縮資源", "(D) 網路資源"], answer: "D" },
+            { id: 45, question: "45 加拿大最早的書目供應中心UTLAS是由那一所大學所建置？", options: ["(A) University of Victoria", "(B) University of Ottawa", "(C) University of Toronto", "(D) Queen’s University"], answer: "C" },
+            { id: 46, question: "46 圖書館中執行權威控制的人員是：", options: ["(A) 編目相關人員", "(B) 總務會計人員", "(C) 館長", "(D) 人事主任"], answer: "A" },
+            { id: 47, question: "47 數位圖書館中，普遍用來支援詮釋資料擷取（harvesting）的協定為何？", options: ["(A) Open URL", "(B) Z 39.50", "(C) OAI-PMH", "(D) SOAP"], answer: "C" },
+            { id: 48, question: "48 《中國機讀編目格式》中，欄號700的意義為何？", options: ["(A) 個人主要著者", "(B) 合著者", "(C) 輔助著者", "(D) 團體著者"], answer: "A" },
+            { id: 49, question: "49 在美國、英國、加拿大，機讀編目格式已整合為MARC21，共包含幾種資料格式？", options: ["(A) 2種", "(B) 3種", "(C) 5種", "(D) 7種"], answer: "C" },
+            { id: 50, question: "50 依據《中國編目規則》，下列何者並非「參照」款目？", options: ["(A) 「見」款目", "(B) 「參見」款目", "(C) 「引見」款目", "(D) 說明參照"], answer: "C" }
+        ]
+    },
+    "3512_99": {
+        title: "99年 地方政府公務人員考試五等試題 - 中文圖書分類編目大意",
+        questions: [
+            { id: 1, question: "1 下列何者為一種控制辭彙？", options: ["(A) 中國編目規則", "(B) 英美編目規則", "(C) 中國機讀編目格式", "(D) 中文圖書標題表"], answer: "D" },
+            { id: 2, question: "2 下列何者並非圖書館編目工作中「加工處理」的作業範圍？", options: ["(A) 貼書標", "(B) 給分類號", "(C) 蓋館藏章", "(D) 貼安全磁條"], answer: "B" },
+            { id: 3, question: "3 下列有關杜威分類法（Dewey Decimal Classification, DDC）之敘述，何者錯誤？", options: ["(A) 美國人杜威發明的分類法", "(B) 是一種十進分類法", "(C) 只適用於公共圖書館", "(D) 是國際上最多圖書館使用的分類法"], answer: "C" },
+            { id: 4, question: "4 書目與目錄最大的不同之處為何？", options: ["(A) 書目的內容多於目錄", "(B) 目錄代表某館的館藏資料，書目通常以主題為編輯導向，揭示該主題之文獻", "(C) 書目記載某館館藏之清冊，目錄則否", "(D) 書目多半依作品的著者編排，目錄則否"], answer: "B" },
+            { id: 5, question: "5 下列何者並非機讀編目格式的組成要素？", options: ["(A) 分類表", "(B) 紀錄結構", "(C) 內容標示符號", "(D) 書目資料內容"], answer: "A" },
+            { id: 6, question: "6 下列何者較適用於一般性網路資源的描述？", options: ["(A) EAD", "(B) Dublin Core", "(C) VRA Core", "(D) GILS"], answer: "B" },
+            { id: 7, question: "7 用來指示圖書館對資訊組織的重點及發展方向者稱為：", options: ["(A) 編目政策", "(B) 館藏發展政策", "(C) 流通政策", "(D) 參考政策"], answer: "A" },
+            { id: 8, question: "8 抄錄編目時，對所抄來的紀錄要針對本館的狀況再予增加的資料為何？", options: ["(A) 正題名", "(B) 出版項", "(C) 國際標準書號", "(D) 館藏地"], answer: "D" },
+            { id: 9, question: "9 MARC21共有幾種格式？", options: ["(A) 3種", "(B) 4種", "(C) 5種", "(D) 6種"], answer: "C" },
+            { id: 10, question: "10 何謂原始編目？", options: ["(A) 指最原始的書目資料", "(B) 指出版品預行編目", "(C) 指由作者自己編目", "(D) 指其他館尚無該書目資料，需由本館自行編目"], answer: "D" },
+            { id: 11, question: "11 依據《中國編目規則》，在著錄「題名及著者敘述項」時，要用什麼標點符號來分隔著作方式相同的著者？", options: ["(A) ；", "(B) ，", "(C) ／", "(D) ＝"], answer: "B" },
+            { id: 12, question: "12 依據《中國編目規則》，識別題名應記於下列何者之後？", options: ["(A) ISSN", "(B) ISBD", "(C) CIP", "(D) ISBN"], answer: "A" },
+            { id: 13, question: "13 圖書的主要著錄來源是：", options: ["(A) 封面", "(B) 書名頁", "(C) 版權頁", "(D) 書背"], answer: "B" },
+            { id: 14, question: "14 下列何者為「稽核項」的正確著錄順序與格式？", options: ["(A) 高廣尺寸：插圖；數量單位＋附件", "(B) 數量單位：插圖；附件＋高廣尺寸", "(C) 附件：插圖；高廣尺寸＋數量單位", "(D) 數量單位：插圖；高廣尺寸＋附件"], answer: "D" },
+            { id: 15, question: "15 依據《中國編目規則》的定義，「持續更新之活頁出版品及網站」稱為：", options: ["(A) 可更新資源", "(B) 整合性資源", "(C) 有限性資源", "(D) 長期性資源"], answer: "B" },
+            { id: 16, question: "16 依據《中國編目規則》，下列何者並非為「集叢項」的子項？", options: ["(A) 集叢號", "(B) 集叢題名", "(C) 集叢著者敘述", "(D) 國際標準書號"], answer: "D" },
+            { id: 17, question: "17 書目紀錄中「Microsoft Excel中文版﹝電子資源﹞」，其中﹝電子資源﹞是指：", options: ["(A) 主要題名", "(B) 資料類型標示", "(C) 副題名", "(D) 並列題名"], answer: "B" },
+            { id: 18, question: "18 外國人名標目若人名相同時，依編目規則的規定應如何區辨之？", options: ["(A) 加註國名", "(B) 加註專長", "(C) 加註出生地", "(D) 加註生卒年代"], answer: "D" },
+            { id: 19, question: "19 依據《中國編目規則》，若會議有①屆次 ②舉行時間 ③舉辦地點，其團體標目在圓括弧中記錄上三項資訊的順序為何？", options: ["(A) ②①③", "(B) ③①②", "(C) ①②③", "(D) ③②①"], answer: "C" },
+            { id: 20, question: "20 依據《中國圖書分類法》，下列有關哲學類圖書分類原則的敘述，何者錯誤？", options: ["(A) 凡專門學科的哲學，如歷史哲學、教育哲學等著作，皆歸入哲學類", "(B) 各國各時代哲學家的著作，都先按國家，次按哲學家在世時代分類", "(C) 研究和批評個別哲學家的著作，隨所研究和批評的哲學家歸類", "(D) 凡論述或批評個別哲學派別或體系的著作，歸入哲學派別或體系"], answer: "A" },
+            { id: 21, question: "21 當作品因版本或譯本眾多而有各種不同的題名時，可以使用何者為其檢索款目，將這些作品在目錄中匯集起來，以利使用者檢索？", options: ["(A) 並列題名", "(B) 識別題名", "(C) 劃一題名", "(D) 副題名"], answer: "C" },
+            { id: 22, question: "22 在《中國圖書分類法》中的「地區複分表」用在那一類號之後？", options: ["(A) 只可用於文學類", "(B) 只可用於藝術類", "(C) 直接用於主表各類之後", "(D) 用於主表類號有標明「依國分」或可按地區分者"], answer: "D" },
+            { id: 23, question: "23 傳記圖書之著者號之取用方法為何？", options: ["(A) 先傳主次著者", "(B) 先著者次傳主", "(C) 先書名次傳主", "(D) 先書名次著者"], answer: "A" },
+            { id: 24, question: "24 冒號分類法（CC）屬於那一種類型的分類法？", options: ["(A) 階層式分類法", "(B) 分析綜合式分類法", "(C) 十進分類法", "(D) 列舉式分類法"], answer: "B" },
+            { id: 25, question: "25 清末何人最早主張舊書仍以四庫法為準則，新書則另創新法處理？", options: ["(A) 沈祖榮", "(B) 杜定友", "(C) 孫毓修", "(D) 劉國鈞"], answer: "C" },
+            { id: 26, question: "26 下列何者可以組成「索書號」：①分類號 ②著者號 ③登錄號 ④版次號", options: ["(A) ①②③", "(B) ①②④", "(C) ①③④", "(D) ②③④"], answer: "B" },
+            { id: 27, question: "27 依據《中國圖書分類法》，在類目下即使未特別註明，亦可使用以進一步複分的附表是：", options: ["(A) 總論複分表", "(B) 史地複分表", "(C) 語言複分表", "(D) 文學複分表"], answer: "A" },
+            { id: 28, question: "28 依據《中國圖書分類法》，《圖書館學與資訊科學大辭典》一書的類號，以下列何者為宜？", options: ["(A) 024", "(B) 020.4", "(C) 020.04", "(D) 020.004"], answer: "B" },
+            { id: 29, question: "29 圖書資料分類時，基本上以何者為最主要的依據？", options: ["(A) 主題內容", "(B) 體裁", "(C) 地域", "(D) 時代"], answer: "A" },
+            { id: 30, question: "30 四角號碼法的著者號取碼方式，係將每一個字的上下左右四個角的筆法分為幾種？", options: ["(A) 4種", "(B) 6種", "(C) 8種", "(D) 10種"], answer: "D" },
+            { id: 31, question: "31 前組合詞彙在編製索引之初已組合完成，下列有關前組合詞彙之敘述何者錯誤？", options: ["(A) 前組合詞彙不專深", "(B) 前組合詞彙編製成本高", "(C) 前組合詞彙之限制多", "(D) 前組合詞彙在檢索時之檢全率低，但檢準率高"], answer: "A" },
+            { id: 32, question: "32 下列何者不屬於索引典的詞彙控制形式？", options: ["(A) 同義詞", "(B) 狹義詞", "(C) 相關詞", "(D) 反義詞"], answer: "D" },
+            { id: 33, question: "33 有關標題表複分標目之形式，下列敘述何者正確？", options: ["(A) 有論題、時代、形式及地區複分四種", "(B) 有論題、一般、時代及地區複分四種", "(C) 有論題、總論及地區複分三種", "(D) 有形式、論題及時代複分三種"], answer: "A" },
+            { id: 34, question: "34 我國的國家圖書館於民國89年開始編訂的詞彙控制工具，稱為：", options: ["(A) 漢語主題詞表", "(B) 中文圖書標題表", "(C) 中文主題詞表", "(D) 漢英主題詞表"], answer: "C" },
+            { id: 35, question: "35 依據《中國機讀權威紀錄格式》，下列那一選項不是一筆權威紀錄所包括的內容？", options: ["(A) 權威標目", "(B) 權威資料來源", "(C) 建立權威紀錄日期", "(D) 資料類型標示"], answer: "D" },
+            { id: 36, question: "36 下列有關美國名稱權威合作計畫（NACO）之敘述，何者錯誤？", options: ["(A) 入會者不收會費", "(B) 需依共同的標準建立標目", "(C) 任何編目員皆可申請加入", "(D) 指名稱、劃一題名與集叢權威紀錄"], answer: "C" },
+            { id: 37, question: "37 下列何者為圖書館常用的權威紀錄？", options: ["(A) 集叢權威紀錄、標題權威紀錄、期刊權威紀錄", "(B) 檔案權威紀錄、標題權威紀錄、名稱權威紀錄", "(C) 地理權威紀錄、標題權威紀錄、名稱權威紀錄", "(D) 集叢權威紀錄、標題權威紀錄、名稱權威紀錄"], answer: "D" },
+            { id: 38, question: "38 合作編目的意義，下列敘述何者正確？", options: ["(A) 分擔編目、各館分享，一館為負責的圖書館，但成員圖書館地位基本是平等的", "(B) 一館編目、多館分享，一館為負責的圖書館，成員圖書館地位基本是不平等的", "(C) 由一個中心機構負責編目，成員圖書館分享中心圖書館的編目成果", "(D) 合作館各成員圖書館的編目人員集中一處編目"], answer: "A" },
+            { id: 39, question: "39 下列何者不是機讀編目格式之重要特性？", options: ["(A) 機讀編目格式是圖書館自動化的基礎", "(B) 通用範圍很廣，可包括圖書及其他多種非書資料", "(C) 是目前國際間使用最普及的書目資料交換格式", "(D) 最易於網路資源的編目"], answer: "D" },
+            { id: 40, question: "40 題名及著者敘述項在《中國機讀編目格式》中，應記載在下列何段？", options: ["(A) 著錄段", "(B) 附註段", "(C) 相關題名段", "(D) 主題分析段"], answer: "A" },
+            { id: 41, question: "41 依據《中國機讀編目格式》，館藏紀錄的欄位是：", options: ["(A) 010", "(B) 020", "(C) 801", "(D) 805"], answer: "D" },
+            { id: 42, question: "42 傳統圖書館自動化系統中，較常用來支援分散式查詢標準的協定為何者？", options: ["(A) OpenURL", "(B) Z39.50", "(C) OAI-PMH", "(D) SOAP"], answer: "B" },
+            { id: 43, question: "43 下列關於都柏林詮釋資料核心集（The Dublin Core Metadata Element Set，簡稱DC）之敘述，何者錯誤？", options: ["(A) DC的發展取代其他詮釋資料格式，使描述資源格式單一化", "(B) 其簡易性會降低描述資料的成本並增進資訊的互通性", "(C) 可對資源作一般性的描述，網路資源使用者可以利用DC的檢索詞彙查詢網路資源，獲得基本指引", "(D) DC有15種欄位"], answer: "A" },
+            { id: 44, question: "44 書目資料庫相關檔案中，那兩種檔案相類似，其目的都在控制欄位的值？", options: ["(A) 代碼檔與書目檔", "(B) 書目檔與館藏檔", "(C) 代碼檔與權威檔", "(D) 權威檔與書目檔"], answer: "C" },
+            { id: 45, question: "45 IFLA FRBR之作品模式談到四層次，其中的載體版本（Manifestation）層次的意義為何？", options: ["(A) 作品呈現方式會記錄在不同的媒體", "(B) 作品由好幾個部分組成", "(C) 作品會有不同的呈現方式", "(D) 作品包含目次、章節正文、表格等"], answer: "A" },
+            { id: 46, question: "46 線上公用目錄目前發展朝向資訊資源整合查詢的趨勢，為達到整合檢索，出現許多支援技術，下列何者不包括在內？", options: ["(A) Z39.50", "(B) SFX", "(C) OpenURL", "(D) COM"], answer: "D" },
+            { id: 47, question: "47 依據《中國編目規則》的規定，關於「出版年」的著錄方式，下列敘述何者錯誤？", options: ["(A) 用西元紀年者，照錄之", "(B) 沒有正式出版的作品，著錄其製作的年代", "(C) 重印之出版品，出版年以重印之年代著錄之", "(D) 西元以外之外國紀年照錄之，並查明西元年代，以方括弧記註於後"], answer: "C" },
+            { id: 48, question: "48 針對圖書資料的內容加以分析，決定分類號及標題的過程稱為：", options: ["(A) 主題編目", "(B) 記述編目", "(C) 合作編目", "(D) 分析編目"], answer: "A" },
+            { id: 49, question: "49 《中國圖書分類法》主要採取何種標記方式？", options: ["(A) 字母標記", "(B) 文字標記", "(C) 數字標記", "(D) 文數字標記"], answer: "C" },
+            { id: 50, question: "50 國際十進分類法的簡稱是：", options: ["(A) CCL", "(B) UDC", "(C) LCC", "(D) DDC"], answer: "B" }
+        ]
+    },
+    "3507_100": {
+        title: "100年 身心障礙人員考試五等試題 - 中文圖書分類編目大意",
+        questions: [
+            { id: 1, question: "1 本名Richard W. Hartzell之著者，其中文姓名為何瑞元，翻譯名為哈瑞特，應如何著錄著者標目？", options: ["(A) 用本名Richard W. Hartzell", "(B) 用哈瑞特", "(C) 用何瑞元", "(D) 用哈瑞特（Richard W. Hartzell）"], answer: "C" },
+            { id: 2, question: "2 國際十進分類法是誰所編製的？", options: ["(A) 布利斯（H. E. Bliss）", "(B) 傑姆士‧布朗（J. Brown）", "(C) 卡特（C. A. Cutter）", "(D) 奧特雷（P. Otlet）和拉封丹（H. La Fontaine）"], answer: "D" },
+            { id: 3, question: "3 下列何者是索引典編製過程中，建立層級間關係的基礎，且可透過其架構檢視收詞的完整性？", options: ["(A) 選詞", "(B) 編製詞彙定義", "(C) 編製詞族", "(D) 版面編排"], answer: "C" },
+            { id: 4, question: "4 下列那些情況可以使用說明參照款目？①用見、參見無法說明清楚者；②團體名稱中冠首的「私立」、「財團法人」等字樣，但不記載於標目內者；③題名冠有「欽定」、「增訂」等字樣，但不記載於標目內者；④團體名稱之更易沿革", options: ["(A) 僅①④", "(B) 僅①②③", "(C) 僅②③④", "(D) ①②③④"], answer: "D" },
+            { id: 5, question: "5 下列何項詮釋資料格式較適用於博物館藏品的描述？", options: ["(A) EAD", "(B) GILS", "(C) CDWA", "(D) MARC"], answer: "C" },
+            { id: 6, question: "6 下列何者為多個圖書館的線上聯合目錄，會員館可以上傳或下載所需的書目紀錄？", options: ["(A) 書號中心", "(B) 書目中心", "(C) 網路書店", "(D) 線上公用目錄"], answer: "B" },
+            { id: 7, question: "7 中國著者於不同語文的作品中使用不同語文的名字，在擇定適用於各語文之名字為標目後，應以何種方式加以連結？", options: ["(A) 分析款目", "(B) 參照款目", "(C) 劃一題名", "(D) 在分析"], answer: "B" },
+            { id: 8, question: "8 在《中國圖書分類法》中，「圖書館與資訊科學」方面的資料是分入那一類？", options: ["(A) 科學類", "(B) 應用科學類", "(C) 社會科學類", "(D) 總類"], answer: "D" },
+            { id: 9, question: "9 標題表中限定形式標題所用的符號為何？", options: ["(A) 方括弧", "(B) 圓括弧", "(C) 逗點", "(D) 破折號"], answer: "B" },
+            { id: 10, question: "10 個人名稱、團體名稱、地名等的不同名稱，或是同一作品的不同題名，其未經選用的標目，應該立何種款目以引見到選用的標目？", options: ["(A) 「參見」款目", "(B) 「見」款目", "(C) 「主要」款目", "(D) 「分析」款目"], answer: "B" },
+            { id: 11, question: "11 下列何者不是克特（Charles Cutter）提出的編製目錄之目標？", options: ["(A) 根據版本與特性，協助讀者選擇", "(B) 依著者、主題、體裁展示圖書館館藏", "(C) 讀者知道出版社及出版年，即可找到該書", "(D) 讀者知道著者、書名、主題，即可找到該書"], answer: "C" },
+            { id: 12, question: "12 「全國圖書書目資訊網」（NBINet）系統，採行之書目資料庫架構為下列何者？", options: ["(A) 分散式書目資料庫", "(B) 集中式書目資料庫", "(C) 折衷式書目資料庫", "(D) 虛擬式書目資料庫"], answer: "B" },
+            { id: 13, question: "13 為區別相同的地名，則下列敘述何者正確？", options: ["(A) 冠上較大地區的地名", "(B) 加上該地名起始年代", "(C) 冠上所屬行政首長姓名", "(D) 加上地區土地面積"], answer: "A" },
+            { id: 14, question: "14 在索書號中，作品號通常不包括下列那種號碼？", options: ["(A) 種次號", "(B) 版次號", "(C) 部冊號", "(D) 登錄號"], answer: "D" },
+            { id: 15, question: "15 建置標題表時，通常使用下列何種詞類？", options: ["(A) 動詞", "(B) 形容詞", "(C) 名詞", "(D) 副詞"], answer: "C" },
+            { id: 16, question: "16 下列那種分類法的標記主要採用阿拉伯數字？", options: ["(A) 國會圖書館分類法", "(B) 中國圖書分類法", "(C) 書目分類法", "(D) 展開分類法"], answer: "B" },
+            { id: 17, question: "17 下列那一項最不適用於進行電子資源編目採用的編目規則？", options: ["(A) 國立中央圖書館中文圖書編目規則", "(B) 英美編目規則第二版修訂版（AACR2R）", "(C) 資源描述與檢索（RDA）", "(D) 中國編目規則第三版"], answer: "A" },
+            { id: 18, question: "18 下列那個檢索點是卡片式目錄通常不提供的？", options: ["(A) 書名", "(B) 作者", "(C) 分類號", "(D) 國際標準書號"], answer: "D" },
+            { id: 19, question: "19 一單冊作品採雙面印刷共有776頁應如何著錄其厚度？", options: ["(A) 776面", "(B) 776葉", "(C) 776張", "(D) 776頁"], answer: "A" },
+            { id: 20, question: "20 美國國會圖書館分類法是以何種分類法為基礎？", options: ["(A) 冒號分類法", "(B) 主題分類法", "(C) 展開式分類法", "(D) 書目分類法"], answer: "C" },
+            { id: 21, question: "21 每個概念用一個主題詞表達，每一個主題詞只能表達一個概念，此屬於字順主題法之何種基本性質？", options: ["(A) 動態性質", "(B) 組配性質", "(C) 靜態性質", "(D) 規範性質"], answer: "D" },
+            { id: 22, question: "22 下列那幾項是「全國圖書書目資訊網」（NBINet）所規定的紀錄規範？①USMARC及MARC21；②Dublin Core；③AACR2R；④EAD", options: ["(A) ①②", "(B) ①③", "(C) ①④", "(D) ②④"], answer: "B" },
+            { id: 23, question: "23 下列何者非圖書館中西文圖書抄錄編目主要的來源管道？", options: ["(A) 書目中心", "(B) 書目光牒", "(C) 預行編目資料", "(D) 期刊書評"], answer: "D" },
+            { id: 24, question: "24 資訊組織的六大功能是由下列那位學者提出的？", options: ["(A) Charles Cutter", "(B) Melvil Dewey", "(C) Arlene Taylor", "(D) Anthony Panizzi"], answer: "C" },
+            { id: 25, question: "25 下列寺廟之名稱標目格式何者正確？", options: ["(A) 臺北市龍山寺", "(B) 龍山寺（臺北市）", "(C) 龍山寺，臺北市", "(D) 臺北市：龍山寺"], answer: "B" },
+            { id: 26, question: "26 若圖書館有兩本相同的圖書，通常會在第二本的著者號下加上什麼，以為區別？", options: ["(A) -2", "(B) v.2", "(C) c.2", "(D) :2"], answer: "C" },
+            { id: 27, question: "27 關於《中文圖書標題表》中之標題款目的組成，下列說明何者錯誤？", options: ["(A) 標題表之選用款目即標題詞", "(B) 參考類號有助於標題詞的辨識", "(C) 註釋僅解釋標題詞的範圍", "(D) 參照包括「見」、「反見」、「參見」及「反參見」等"], answer: "C" },
+            { id: 28, question: "28 根據《中國編目規則》之規定，下列那一個人名標目格式不正確？", options: ["(A) 明太祖", "(B) （宋）太祖", "(C) 釋聖嚴", "(D) （宋）歐陽修"], answer: "B" },
+            { id: 29, question: "29 下列何者不是都柏林核心集（Dublin Core）的特性？", options: ["(A) 可作為資源的一般性描述", "(B) 是柏克萊大學所研訂的詮釋資料格式", "(C) 具有15個核心欄位", "(D) 可作為異質系統分散查詢的資料格式"], answer: "B" },
+            { id: 30, question: "30 開架式圖書館仍需要提供館藏目錄的原因，下列何者錯誤？", options: ["(A) 可更完整找尋館藏", "(B) 彌補書架排列中斷的問題", "(C) 可快速找到特定資料", "(D) 完全取代人工服務"], answer: "D" },
+            { id: 31, question: "31 作品若從另一種資料轉製而來，應如何著錄？①依現在之類型著錄；②依原始類型著錄；③在附註項說明據以轉製之原始類型；④以原始類型為資料類型標示", options: ["(A) ①③", "(B) ①④", "(C) ②③", "(D) ②④"], answer: "A" },
+            { id: 32, question: "32 下列有關杜威十進分類法的敘述，何者是不正確的？", options: ["(A) 有助記特性", "(B) 有相關索引", "(C) 不具有組合的特性", "(D) 時常修訂"], answer: "C" },
+            { id: 33, question: "33 標題表特別注重「參照」功能，主要是因為其有何功用？", options: ["(A) 提供新觀念", "(B) 使語詞標準化", "(C) 提供語彙的前後順序關係", "(D) 提供詞間關係"], answer: "D" },
+            { id: 34, question: "34 根據《中國機讀權威紀錄格式》的規定，若要將一個外國團體的原始語文標目及其中譯標目分別建立成不同的兩筆記錄，應在個別的每筆紀錄中，以那一欄號編製連接標目相連之？", options: ["(A) 110", "(B) 310", "(C) 710", "(D) 810"], answer: "C" },
+            { id: 35, question: "35 「英美編目規則」因應網路時代編目需求，經討論新修訂之規範名稱為：", options: ["(A) 英美編目規則第二版（AACR2）", "(B) 資源描述與檢索（RDA）", "(C) 國際標準書目著錄（ISBD）", "(D) 書目紀錄功能需求（FRBR）"], answer: "B" },
+            { id: 36, question: "36 若書目紀錄記載27×13公分，表示這是：", options: ["(A) 多冊書", "(B) 橫本", "(C) 長本", "(D) 折疊本"], answer: "C" },
+            { id: 37, question: "37 分類員為下列那本書取索書號時，通常會在分類號的上方加上特藏號？", options: ["(A) 《神雕俠侶》", "(B) 《愛滋病與媒體》", "(C) 《讀書方法》", "(D) 《圖書館學與資訊科學大辭典》"], answer: "D" },
+            { id: 38, question: "38 後組合式主題詞之組配於何時進行？", options: ["(A) 編表時", "(B) 系統建置時", "(C) 標引時", "(D) 檢索時"], answer: "D" },
+            { id: 39, question: "39 下列參加「全國圖書書目資訊網」（NBINet）的合作館，應盡的義務為何？①維護書目品質；②每年繳交年費；③每年提交各館期刊採購清單；④遵循相關建檔規範", options: ["(A) ①④", "(B) ②③", "(C) ①②③", "(D) ②③④"], answer: "A" },
+            { id: 40, question: "40 第四代線上公用目錄最大特色在於超文本的連結功能，此項功能充分發揮目錄的那一項功能？", options: ["(A) 查詢（find）", "(B) 辨識（identify）", "(C) 選擇（select）", "(D) 導航（navigate）"], answer: "D" },
+            { id: 41, question: "41 下列何者出版了字典式目錄規則，對日後英美編目規則的發展有很大影響？", options: ["(A) Charles Cutter", "(B) Charles Jewett", "(C) Seymour Lubetzky", "(D) Anthony Panizzi"], answer: "A" },
+            { id: 42, question: "42 連續性出版品的正題名如果有大幅更改，應如何著錄？", options: ["(A) 依舊題名之資料著錄，另於附註項說明", "(B) 另行編目", "(C) 依舊題名之資料著錄即可", "(D) 僅於附註項著錄即可"], answer: "B" },
+            { id: 43, question: "43 杜威十進分類法中，類號「200」代表的學科類別為：", options: ["(A) 文學類（Literature）", "(B) 宗教類（Religion）", "(C) 教育類（Education）", "(D) 哲學類（Philosophy）"], answer: "B" },
+            { id: 44, question: "44 關於主題分析的描述順序，下列敘述何者有錯誤？", options: ["(A) 先進行概念分析再將概念轉換為索引詞彙", "(B) 檢視作品內容並分析其所包含概念", "(C) 檢視作品內容，分析其所包含概念並確立索引目的", "(D) 不必檢視作品內容前後線索，只從題名決定主題"], answer: "D" },
+            { id: 45, question: "45 MARC21 Format for Authority Data的反見標目段是在下列那一段？", options: ["(A) 1××", "(B) 2××", "(C) 4××", "(D) 5××"], answer: "C" },
+            { id: 46, question: "46 在機讀編目格式欄位中，是每一欄第一個資料單元，用以指示該欄內容與他欄相互關係的欄位稱為：", options: ["(A) 定長欄", "(B) 變長欄", "(C) 必備欄", "(D) 指標"], answer: "D" },
+            { id: 47, question: "47 下列關於卡片目錄的敘述，那一個是不正確的？", options: ["(A) 易於抽換、更新是其優點", "(B) 目前其著錄內容尚未標準化", "(C) 在19世紀後半期引進圖書館", "(D) 美國國會圖書館率先銷售印刷卡片"], answer: "B" },
+            { id: 48, question: "48 定期發行的連續性出版品之附件，其處理方式何者有誤？", options: ["(A) 著錄於稽核項末", "(B) 視為另一作品著錄", "(C) 著錄於附註項", "(D) 著錄於正題名之後"], answer: "D" },
+            { id: 49, question: "49 下列有關美國國會圖書館分類法主要大類的敘述，何者是錯誤的？", options: ["(A) G是地理（Geography）", "(B) L是法律（Law）", "(C) M是音樂（Music）", "(D) T是技術（Technology）"], answer: "B" },
+            { id: 50, question: "50 下列關於控制詞彙的描述，何者錯誤？", options: ["(A) 控制詞彙的數量，依文獻內容而定", "(B) 建立有用途的詞彙", "(C) 加入新詞彙時，文獻上要有相應的新觀點", "(D) 描述作品主題時，優先採用廣義詞彙"], answer: "D" }
+        ]
+    }
+};
+
+let currentQuestions = [];
+let isShuffleOptionsActive = false;
+let currentMode = 'practice'; // 'practice' 或 'exam'
+
+// 洗牌演算法 (Fisher-Yates)
+function shuffleArray(array) {
+    let arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+// 載入與渲染試題
+function renderQuiz() {
+    const quizContainer = document.getElementById('quiz-container');
+    quizContainer.innerHTML = '';
+    document.getElementById('score-board').style.display = 'none';
+
+    // 根據模式顯示或隱藏交卷按鈕
+    const submitBtn = document.getElementById('submit-btn');
+    submitBtn.style.display = (currentMode === 'exam') ? 'block' : 'none';
+
+    const keys = ['A', 'B', 'C', 'D'];
+
+    currentQuestions.forEach((q, qIndex) => {
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        card.id = `q-card-${qIndex}`;
+
+        const title = document.createElement('div');
+        title.className = 'question-title';
+        title.innerText = q.question;
+        card.appendChild(title);
+
+        const optionsList = document.createElement('ul');
+        optionsList.className = 'options-list';
+
+        // 解析並結構化選項
+        let formattedOpts = q.options.map((optText, origIdx) => {
+            const cleanText = optText.replace(/^\([A-D]\)\s*/, '');
+            const origKey = keys[origIdx];
+            return {
+                text: cleanText,
+                isCorrect: (origKey === q.answer),
+                origKey: origKey
+            };
+        });
+
+        // 打亂選項
+        if (isShuffleOptionsActive) {
+            formattedOpts = shuffleArray(formattedOpts);
+        }
+
+        formattedOpts.forEach((optObj, displayIdx) => {
+            const displayKey = keys[displayIdx];
+            const li = document.createElement('li');
+            li.className = 'option-item';
+            li.id = `opt-item-${qIndex}-${displayKey}`;
+
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = `question-${qIndex}`;
+            radio.id = `q-${qIndex}-opt-${displayKey}`;
+            radio.dataset.isCorrect = optObj.isCorrect;
+            radio.dataset.displayKey = displayKey;
+            radio.dataset.optText = optObj.text;
+
+            // 監聽點擊事件（練習模式用）
+            radio.onchange = () => handleOptionSelect(qIndex, radio);
+
+            const label = document.createElement('label');
+            label.htmlFor = `q-${qIndex}-opt-${displayKey}`;
+            label.innerText = `(${displayKey}) ${optObj.text}`;
+
+            li.appendChild(radio);
+            li.appendChild(label);
+            optionsList.appendChild(li);
+        });
+
+        card.appendChild(optionsList);
+
+        const feedback = document.createElement('div');
+        feedback.className = 'answer-feedback';
+        feedback.id = `feedback-${qIndex}`;
+        card.appendChild(feedback);
+
+        quizContainer.appendChild(card);
+    });
+}
+
+// 練習模式：單題選擇後即時顯示答案
+function handleOptionSelect(qIndex, radioInput) {
+    if (currentMode !== 'practice') return;
+
+    const card = document.getElementById(`q-card-${qIndex}`);
+    const feedback = document.getElementById(`feedback-${qIndex}`);
+    const radios = document.querySelectorAll(`input[name="question-${qIndex}"]`);
+
+    // 點選後鎖定該題選項，避免重複修改
+    radios.forEach(r => r.disabled = true);
+
+    const isCorrect = (radioInput.dataset.isCorrect === "true");
+    const userDisplayKey = radioInput.dataset.displayKey;
+
+    let correctDisplayKey = '';
+    let correctText = '';
+
+    radios.forEach(r => {
+        const itemLi = document.getElementById(`opt-item-${qIndex}-${r.dataset.displayKey}`);
+        if (r.dataset.isCorrect === "true") {
+            correctDisplayKey = r.dataset.displayKey;
+            correctText = r.dataset.optText;
+            itemLi.classList.add('opt-correct-highlight'); // 正確選項顯示綠色背景
+        }
+    });
+
+    feedback.style.display = 'block';
+
+    if (isCorrect) {
+        card.classList.add('correct');
+        feedback.innerHTML = `<span style="color: var(--correct-color);">✓ 答對了！標準答案：(${correctDisplayKey}) ${correctText}</span>`;
+    } else {
+        card.classList.add('incorrect');
+        const userLi = document.getElementById(`opt-item-${qIndex}-${userDisplayKey}`);
+        userLi.classList.add('opt-incorrect-highlight'); // 選錯的選項顯示紅色背景
+        feedback.innerHTML = `<span style="color: var(--incorrect-color);">✗ 答錯了！你的答案：(${userDisplayKey})，標準答案：(${correctDisplayKey}) ${correctText}</span>`;
+    }
+}
+
+// 切換/重置測驗
+function resetQuiz() {
+    currentMode = document.getElementById('mode-select').value;
+    const selectedExamKey = document.getElementById('exam-select').value;
+    
+    // 深拷貝一份題目
+    currentQuestions = JSON.parse(JSON.stringify(EXAM_DATABASE[selectedExamKey].questions));
+    renderQuiz();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// 隨機打亂題目順序
+function shuffleQuestions() {
+    currentQuestions = shuffleArray(currentQuestions);
+    renderQuiz();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// 開啟/關閉打亂選項
+function toggleShuffleOptions() {
+    isShuffleOptionsActive = !isShuffleOptionsActive;
+    const btn = document.getElementById('btn-shuffle-opts');
+    if (isShuffleOptionsActive) {
+        btn.classList.add('btn-toggle-active');
+        btn.innerText = '🔀 選項已打亂';
+    } else {
+        btn.classList.remove('btn-toggle-active');
+        btn.innerText = '🔀 打亂選項';
+    }
+    renderQuiz();
+}
+
+// 深色/淺色模式切換
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+}
+
+// 考試模式：交卷對答案
+function gradeQuiz() {
+    let score = 0;
+
+    currentQuestions.forEach((q, qIndex) => {
+        const card = document.getElementById(`q-card-${qIndex}`);
+        const feedback = document.getElementById(`feedback-${qIndex}`);
+        const selectedRadio = document.querySelector(`input[name="question-${qIndex}"]:checked`);
+        const allRadios = document.querySelectorAll(`input[name="question-${qIndex}"]`);
+
+        card.classList.remove('correct', 'incorrect');
+        feedback.style.display = 'block';
+
+        let correctDisplayKey = '';
+        let correctText = '';
+        allRadios.forEach(r => {
+            if (r.dataset.isCorrect === "true") {
+                correctDisplayKey = r.dataset.displayKey;
+                correctText = r.dataset.optText;
+            }
+        });
+
+        if (selectedRadio) {
+            const isCorrect = (selectedRadio.dataset.isCorrect === "true");
+            const userDisplayKey = selectedRadio.dataset.displayKey;
+
+            if (isCorrect) {
+                score += 2;
+                card.classList.add('correct');
+                feedback.innerHTML = `<span style="color: var(--correct-color);">✓ 答對了！標準答案：(${correctDisplayKey}) ${correctText}</span>`;
+            } else {
+                card.classList.add('incorrect');
+                feedback.innerHTML = `<span style="color: var(--incorrect-color);">✗ 答錯了！你的答案：(${userDisplayKey})，標準答案：(${correctDisplayKey}) ${correctText}</span>`;
+            }
+        } else {
+            card.classList.add('incorrect');
+            feedback.innerHTML = `<span style="color: var(--incorrect-color);">未作答！標準答案：(${correctDisplayKey}) ${correctText}</span>`;
+        }
+    });
+
+    const scoreBoard = document.getElementById('score-board');
+    scoreBoard.style.display = 'block';
+    scoreBoard.innerHTML = `測驗總分：<span style="color: ${score >= 60 ? 'var(--correct-color)' : 'var(--incorrect-color)'}; font-size: 26px;">${score}</span> / 100 分 （答對 ${score/2} / ${currentQuestions.length} 題）`;
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// 頁面初始化
+window.onload = resetQuiz;
+</script>
+
+</body>
+</html>
