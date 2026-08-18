@@ -33,6 +33,22 @@
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{
+  <!-- 登入驗證視窗 -->
+<div id="login-modal" class="login-overlay">
+  <div class="login-card">
+    <h2>題庫測驗系統登入</h2>
+    <div class="login-field">
+      <label for="username">帳號</label>
+      <input type="text" id="username" placeholder="請輸入帳號" autocomplete="off">
+    </div>
+    <div class="login-field">
+      <label for="password">密碼</label>
+      <input type="password" id="password" placeholder="請輸入密碼">
+    </div>
+    <div id="login-error" class="login-error">帳號或密碼錯誤，請重新輸入！</div>
+    <button id="login-btn" class="btn-primary" style="width: 100%; margin-top: 6px;">登入</button>
+  </div>
+</div>
   background:var(--paper); color:var(--ink); font-family:var(--font-body);
   font-size:16px; line-height:1.65; -webkit-font-smoothing:antialiased;
   -webkit-tap-highlight-color:transparent;
