@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>題庫測驗．圖書館學大意</title>
+<meta name="description" content="歷屆公職考試題庫練習－圖書資訊管理．圖書館學大意">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ 設計變數 Design Tokens ============ */
+:root{
+  --paper:#EDE7D6; --paper-alt:#E4DDC8; --card:#F8F4E8;
+  --ink:#22302B; --ink-soft:#5C6660; --line:#CFC6A9;
+  --brass:#8E7B45; --stamp:#A23B2E;
+  --correct:#4C6B47; --incorrect:#A23B2E;
+  --correct-bg:#E3EAE0; --incorrect-bg:#F1E1DB;
+  --radius:4px;
+  --shadow:0 1px 2px rgba(34,42,36,.08),0 3px 10px rgba(34,42,36,.06);
+  --font-display:'Noto Serif TC',serif;
+  --font-body:'Noto Sans TC',sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+}
+[data-theme="dark"]{
+  --paper:#1B1D1A; --paper-alt:#202320; --card:#242621;
+  --ink:#E9E4D3; --ink-soft:#A9A392; --line:#3A3B33;
+  --brass:#C2AA66; --stamp:#C4584A;
+  --correct:#86A876; --incorrect:#C4584A;
+  --correct-bg:#26301F; --incorrect-bg:#32211C;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--ink); font-family:var(--font-body);
+  font-size:16px; line-height:1.65; -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color .25s ease,color .25s ease;
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+button{touch-action:manipulation; font-family:inherit}
+.app-shell{max-width:900px;margin:0 auto;padding:22px 20px 72px}
+
+/* ============ Header ============ */
+.site-header,.quiz-header{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:14px;
+  padding:6px 0 24px;border-bottom:1px solid var(--line);margin-bottom:26px;
+}
+.brand{display:flex;align-items:center;gap:13px;min-width:0}
+.brand-mark{
+  width:44px;height:44px;border-radius:50%;border:2px solid var(--brass);color:var(--brass);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-family:var(--font-display);font-size:19px;font-weight:600;
+}
+.site-header h1,.quiz-title h1{
+  font-family:var(--font-display);font-weight:700;font-size:21px;margin:0 0 3px;
+  letter-spacing:.02em; overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.tagline,.quiz-meta{
+  font-family:var(--font-mono);font-size:12px;color:var(--ink-soft);margin:0;letter-spacing:.03em;
+}
+.quiz-title{min-width:0;flex:1}
+.toolbar{display:flex;gap:7px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+.icon-btn{
+  width:38px;height:38px;border-radius:50%;border:1px solid var(--line);
+  background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:background-color .15s,transform .15s,border-color .15s;position:relative;
+}
+.icon-btn:hover{border-color:var(--brass)}
+.icon-btn:active{transform:scale(.92)}
+.icon-btn.is-active{background:var(--brass);border-color:var(--brass);color:var(--paper)}
+.icon-btn svg{width:17px;height:17px}
+button:focus-visible,.link-btn:focus-visible{outline:2px solid var(--stamp);outline-offset:2px}
+.link-btn{
+  background:none;border:none;color:var(--ink-soft);font-size:13.5px;cursor:pointer;
+  padding:8px 4px;text-decoration:underline;text-underline-offset:3px;white-space:nowrap;
+}
+.link-btn:hover{color:var(--ink)}
+
+/* ============ Catalog (home) ============ */
+.catalog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.bank-card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:19px 18px;display:flex;flex-direction:column;gap:7px;box-shadow:var(--shadow);
+  position:relative; animation:fadeIn .3s ease backwards;
+}
+.bank-card::before{
+  content:'';position:absolute;left:0;top:14px;bottom:14px;width:3px;
+  background:var(--brass);border-radius:0 2px 2px 0;
+}
+.bank-card-code{font-family:var(--font-mono);font-size:11px;color:var(--brass);letter-spacing:.08em}
+.bank-card-title{font-family:var(--font-display);font-size:17px;font-weight:600;margin:0;line-height:1.4}
+.bank-card-meta{font-size:12.5px;color:var(--ink-soft);margin:0}
+.bank-card-footer{margin-top:auto;padding-top:13px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.bank-card-count{font-family:var(--font-mono);font-size:12.5px;color:var(--ink-soft)}
+.bank-card-btns{display:flex;align-items:center;gap:12px}
+.btn-text{background:none;border:none;font-size:12.5px;color:var(--ink-soft);cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:4px 0}
+.btn-text:hover{color:var(--stamp)}
+.bank-card-empty{border-style:dashed;align-items:center;justify-content:center;text-align:center;color:var(--ink-soft);box-shadow:none;background:transparent}
+.bank-card-empty::before{display:none}
+.catalog-note{font-family:var(--font-mono);font-size:12px;color:var(--ink-soft);margin:0 0 16px}
+
+.btn-primary{
+  font-weight:600;font-size:13.5px;background:var(--ink);color:var(--paper);border:none;
+  border-radius:var(--radius);padding:9px 15px;cursor:pointer;
+  transition:transform .15s,background-color .15s;white-space:nowrap;
+}
+.btn-primary:hover{background:var(--stamp)}
+.btn-primary:active{transform:scale(.97)}
+.btn-ghost{
+  font-weight:600;font-size:13.5px;background:transparent;color:var(--ink);border:1px solid var(--line);
+  border-radius:var(--radius);padding:9px 15px;cursor:pointer;
+  transition:border-color .15s,background-color .15s;
+}
+.btn-ghost:hover{border-color:var(--brass);background:var(--card)}
+.btn-ghost:disabled,.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-ghost.is-active{border-color:var(--brass);background:var(--card);color:var(--brass)}
+
+/* ============ progress ============ */
+.progress-bar{height:3px;background:var(--line);border-radius:2px;overflow:hidden;margin-bottom:24px}
+.progress-fill{height:100%;background:var(--brass);transition:width .3s ease}
+
+/* ============ mode toolbar (shuffle etc) ============ */
+.mode-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.mode-btn{
+  display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;
+  background:var(--card);color:var(--ink-soft);border:1px solid var(--line);border-radius:20px;
+  padding:7px 13px;cursor:pointer;transition:all .15s;
+}
+.mode-btn:hover{border-color:var(--brass)}
+.mode-btn.is-active{background:var(--brass);border-color:var(--brass);color:var(--paper)}
+.mode-btn svg{width:13px;height:13px}
+
+/* ============ question card ============ */
+.question-card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:26px 24px;box-shadow:var(--shadow);margin-bottom:20px;animation:fadeIn .25s ease;
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.question-num{font-family:var(--font-mono);font-size:12.5px;color:var(--brass);letter-spacing:.1em;margin-bottom:10px}
+.question-text{font-size:18.5px;line-height:1.7;margin:0 0 20px;font-weight:500}
+.options{display:flex;flex-direction:column;gap:9px}
+.option{
+  display:flex;align-items:center;gap:12px;text-align:left;width:100%;
+  padding:12px 15px;border:1px solid var(--line);border-radius:var(--radius);
+  background:var(--paper);cursor:pointer;font-size:15px;color:var(--ink);line-height:1.5;
+  transition:border-color .15s,background-color .15s;
+}
+.option:hover:not(:disabled){border-color:var(--brass)}
+.option:disabled{cursor:default;opacity:1}
+.bubble{font-size:16px;width:18px;flex-shrink:0;text-align:center;color:var(--ink-soft)}
+.option-letter{font-family:var(--font-mono);font-weight:600;color:var(--ink-soft);flex-shrink:0;font-size:14px}
+.option-text{flex:1}
+.tag{font-family:var(--font-mono);font-size:10.5px;padding:3px 8px;border-radius:10px;flex-shrink:0;white-space:nowrap}
+.option.is-correct{border-color:var(--correct);background:var(--correct-bg)}
+.option.is-correct .bubble{color:var(--correct)}
+.option.is-correct .tag{background:var(--correct);color:var(--paper)}
+.option.is-incorrect{border-color:var(--incorrect);background:var(--incorrect-bg)}
+.option.is-incorrect .bubble{color:var(--incorrect)}
+.option.is-incorrect .tag{background:var(--incorrect);color:var(--paper)}
+.option.is-dim{opacity:.55}
+
+.quiz-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;gap:10px}
+
+.grid-nav h2{
+  font-family:var(--font-mono);font-size:12px;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--ink-soft);font-weight:600;margin:0 0 12px;
+}
+.grid-nav-cells{display:flex;flex-wrap:wrap;gap:7px}
+.cell{
+  width:33px;height:33px;border-radius:50%;border:1px solid var(--line);background:var(--card);
+  font-family:var(--font-mono);font-size:11.5px;color:var(--ink-soft);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+}
+.cell:hover{border-color:var(--brass)}
+.cell.is-current{border-color:var(--ink);border-width:2px;color:var(--ink);font-weight:700}
+.cell.is-correct{background:var(--correct);border-color:var(--correct);color:var(--paper)}
+.cell.is-incorrect{background:var(--incorrect);border-color:var(--incorrect);color:var(--paper)}
+
+/* ============ results ============ */
+.results-main{display:flex;flex-direction:column;align-items:center;text-align:center;gap:26px}
+.score-stamp{display:flex;flex-direction:column;align-items:center;gap:6px;margin:10px 0 6px}
+.score-stamp-ring{
+  width:132px;height:132px;border-radius:50%;border:3px double var(--stamp);color:var(--stamp);
+  display:flex;align-items:baseline;justify-content:center;transform:rotate(-5deg);font-family:var(--font-display);
+}
+.score-num{font-size:42px;font-weight:700}
+.score-slash{font-size:20px;margin:0 3px;opacity:.6}
+.score-total{font-size:20px;opacity:.8}
+.score-pct{font-family:var(--font-mono);color:var(--ink-soft);font-size:13.5px;letter-spacing:.05em}
+.results-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.review{text-align:left;width:100%;margin-top:6px}
+.review h2{font-family:var(--font-display);font-size:16.5px;margin:0 0 13px}
+.review-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:13px}
+.review-list li{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:15px 17px}
+.review-q{font-weight:600;margin:0 0 8px;font-size:14.5px}
+.review-a{margin:0 0 4px;font-size:13.5px;color:var(--incorrect)}
+.review-correct{margin:0;font-size:13.5px;color:var(--correct)}
+.all-correct{font-family:var(--font-display);font-size:17px;color:var(--correct)}
+
+@media (max-width:560px){
+  .quiz-title h1,.site-header h1{font-size:17px}
+  .question-text{font-size:16.5px}
+  .catalog-grid{grid-template-columns:1fr}
+  .cell{width:29px;height:29px}
+  .app-shell{padding:16px 14px 60px}
+  .quiz-header,.site-header{gap:10px}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+'use strict';
+
+/* ============ 題庫資料 DATA ============ */
+/* 要新增題庫時：把新的題庫物件加進這個陣列即可（格式同下）。*/
+const QUESTION_BANKS = [{"id": "y99-4512", "year": "99", "examName": "99年特種考試地方政府公務人員考試", "level": "五等考試", "category": "圖書資訊管理", "subject": "圖書館學大意", "code": "4512", "questions": [{"q": "下列何者為中國唐代主要的傳播媒體形式？", "options": ["簡冊", "卷軸", "冊葉", "平裝"], "a": 1}, {"q": "依據我國「公共圖書館設立及營運基準」，公共圖書館之員額編制、館藏量及建築面積應以下列何者為基準？", "options": ["轄區內圖書館數量", "轄區總面積", "年度預算", "轄區內人口總數"], "a": 3}, {"q": "圖書館將購買有版權的音樂 CD 轉錄成 MP3，分送同仁欣賞。下列敘述，何者正確？", "options": ["只要不公開播放即不算違法", "此舉觸犯著作權法", "只要不提供使用者下載即不算違法", "轉錄為 MP3 屬於合法的重製行為"], "a": 1}, {"q": "根據我國「高級中學圖書館設立及營運基準」，高中圖書館基本館藏為：", "options": ["至少 12,000 冊", "至少 15,000 冊", "至少 20,000 冊", "至少 30,000 冊"], "a": 0}, {"q": "殺青或汗青是中國古代那一種書寫材料製作的最後一道工序？", "options": ["甲骨", "竹簡", "版牘", "絲帛"], "a": 1}, {"q": "我國修訂公布的圖書館統計標準（CNS13151），有關電子資源統計部分，主要參考下列何者？", "options": ["中國大陸 GB/T 13191－91", "圖書館聯盟國際組織 ICOLC Guidelines", "國際標準組織 ISO 2789：2003", "美國國家標準局／國家資訊標準組織 NISO Z39.7-2004"], "a": 2}, {"q": "根據 Toffler（1980）和 Naisbitt（1984）對「資訊社會時代」的看法，以下何者為經濟生產活動的第四大要素？", "options": ["土地", "勞力", "資本", "資訊"], "a": 3}, {"q": "辦理出版品國際交流及履行國際交換協約義務，為下列何種類型圖書館的主要功能之一？", "options": ["大學圖書館", "國家圖書館", "公共圖書館", "專門圖書館"], "a": 1}, {"q": "「魔鬼詩篇」一書出版後，被回教國家抵制，主要反應以下何種議題？", "options": ["著作權", "智慧財產權", "隱私權", "書籍查檢制度"], "a": 3}, {"q": "下列那些號碼之申請為國家圖書館國際標準書號中心之主管業務？", "options": ["ISBN、ISSN、ISRC", "CODEN、ISBN、ISRC", "ISBN、ISSN、CODEN", "ISRC、CODEN、ISSN"], "a": [0, 1, 2, 3]}, {"q": "與普通圖書相比，下列何者不屬於參考書的特性？", "options": ["通常只供部分閱讀", "編排特殊，易於查檢", "備有索引，適合做完整系統性的閱讀", "內容以研究參考和解答問題為主"], "a": 2}, {"q": "中國第一部類書是：", "options": ["皇覽", "古今圖書集成", "永樂大典", "佩文韻府"], "a": 0}, {"q": "下列何者不屬於「連續性出版品」？", "options": ["年鑑", "公報", "地圖", "學報"], "a": 2}, {"q": "ERIC 資料庫主要收錄何種學科的資訊？", "options": ["教育", "電機", "大眾傳播", "英美文學"], "a": 0}, {"q": "大學圖書館或學校圖書館媒體中心的 reserved books 所指為何？", "options": ["善本書", "指定參考書", "讀者薦購的書", "讀者續借的書"], "a": 1}, {"q": "NBINet 屬於：", "options": ["多館共同建立的聯合目錄資料庫", "專為優良圖書建立的聯合目錄資料庫", "僅有虛擬檢索介面的聯合目錄資料庫", "僅能透過 Z39.50 檢索的聯合目錄資料庫"], "a": 0}, {"q": "根據 Taylor（1968）所提出資訊需求之定義，下列何者是指「使用者因受限於館藏或系統環境因素，而修正個人的需求」？", "options": ["內藏式需求（visceral）", "妥協式需求（compromised）", "意識化需求（conscious）", "正式化需求（formalized）"], "a": 1}, {"q": "下列何種詞典最適合用來查詢形容「悲傷」的各種說法？", "options": ["同義詞詞典", "諺語詞典", "縮寫詞典", "聯綿詞典"], "a": 0}, {"q": "根據 Mason 所提 PAPA 資訊倫理模式，若圖書館在其網站上提供來源不明或錯誤的資料，有違以下何者？", "options": ["個人隱私權（Privacy）", "資訊正確性（Accuracy）", "智慧財產權（Property）", "資訊取用權（Access）"], "a": 1}, {"q": "全國文獻傳遞服務系統是為讀者提供下列何種服務？", "options": ["獲取期刊全文", "解答疑問", "進行數位化", "建立社群溝通管道"], "a": 0}, {"q": "以下有關 JCR（Journal Citation Report）的敘述，何者正確？", "options": ["是一種電子書", "可查找期刊影響係數", "可查找會議論文", "是一種灰色文獻"], "a": 1}, {"q": "有關網站典藏（Web Archive）系統的敘述，下列何者正確？", "options": ["保存網路上有價值的資料", "保存檔案局的資料", "將紙本檔案進行數位化", "將機構所屬人員的研究產出進行數位化"], "a": 0}, {"q": "有關行銷之核心概念，下列何者錯誤？", "options": ["行銷是一系列的活動，主要目的在將生產者所提供的產品或服務，引導至消費者手中", "非營利機構為爭取銷售產品及服務以換取利潤，可藉由行銷來完成其目標", "行銷的對象從產品與服務，到人、場所、想法、經驗、組織，無一不能行銷", "行銷不是一面倒的促進產品與服務需求，有時也需要進行反向行銷（De-marketing）"], "a": 1}, {"q": "以下關於 NetLibrary 的敘述，何者正確？", "options": ["主要提供電子書服務", "有 20％是適合大專使用的圖書", "有 90％的書適合中小學生使用", "主要提供電子期刊服務"], "a": 0}, {"q": "下列那一個組織的使命是推動兒童文學事業發展和兒童閱讀？", "options": ["iYOUTH", "IBBY", "IFLA", "OCLC"], "a": 1}, {"q": "「本文介紹臺灣鄉鎮圖書館之現況，並以案例說明其遭遇的問題與解決之道。」是那一類型摘要經常出現的書寫方式？", "options": ["指示性摘要", "資訊性摘要", "評論性摘要", "實證性摘要"], "a": 0}, {"q": "下列何者不屬於全面品質管理（TQM）的特色？", "options": ["持續不斷改進品質，做到精益求精", "專注於管理階層需求，以員工為中心", "以團隊為導向，強調全員參與", "運用科學分析方法，作為改進參考"], "a": 1}, {"q": "圖書館提供讀者及工作人員使用之空間，其照明度以多少勒克斯（Lux）較適宜？", "options": ["200－300", "310－400", "500－750", "760－900"], "a": 2}, {"q": "下列何者為圖書館服務品質評估量表？", "options": ["SERVQUAL", "Big6", "TQM", "Bradford Law"], "a": 0}, {"q": "下列那種統計資料可用來衡量圖書館技術服務的成效？", "options": ["各式館藏數量統計", "瀏覽網站人數統計", "分類編目業務統計", "各種資料借閱統計"], "a": 2}, {"q": "有關 ISO 9000 系列國際品質管理與保證標準之內容，不包括下列何者？", "options": ["人力資源", "經費預算", "作業流程", "工作環境"], "a": 1}, {"q": "1GB 的記憶容量等於多少 Bytes？", "options": ["2 的 10 次方", "10 的 2 次方", "2 的 30 次方", "16 的 10 次方"], "a": 2}, {"q": "資料階層架構由下到上之正確排序為何？", "options": ["位元、字元、欄位、檔案、紀錄、資料庫", "位元、字元、紀錄、欄位、檔案、資料庫", "位元、字元、欄位、紀錄、檔案、資料庫", "字元、位元、欄位、紀錄、資料庫、檔案"], "a": 2}, {"q": "教育部於民國 93-97 年為縮短國內數位城鄉落差，主要成立以下何種單位？", "options": ["數位機會中心", "資訊素養推動小組", "資訊志工團隊", "數位圖書館"], "a": 0}, {"q": "下列有關電子文件格式 PDF 的敘述，何者正確？", "options": ["必須在特殊的電腦上才能閱讀文件內容", "可利用 Microsoft WORD 直接修改文件內容", "閱讀時的縮放比例會影響文件的解析度", "可使用 Acrobat Reader 閱讀文件內容"], "a": 3}, {"q": "下列有關電腦病毒的敘述，何者正確？", "options": ["只要不儲存網頁資料即不會感染病毒", "購買防毒軟體即可刪除所有病毒", "電腦病毒對檔案及硬體皆可能造成損害", "電腦關機後病毒便會自動消失"], "a": 2}, {"q": "下列有關 Unicode 字元編碼標準的描述，何者錯誤？", "options": ["Unicode 可涵蓋世界各種不同的文字", "Unicode 也包含了 ASCII 字元", "Unicode 可應用於簡體及繁體字", "Unicode 是以 32 位元進行編碼"], "a": 3}, {"q": "有關模糊查詢（Fuzzy search）功能的描述，下列何者錯誤？", "options": ["檢索者必須使用布林邏輯運算元", "容許檢索者以自然語言進行查詢", "系統可處理詞類變化或檢索出近似字串", "系統可判斷檢索結果與查詢字串的相關程度"], "a": 0}, {"q": "資訊檢索時，應用下列何種指令可避免鍵入「中國」檢索語，卻找出「國中」的資料？", "options": ["中國兩字間應用布林邏輯 AND", "中國兩字間應用布林邏輯 OR", "中國兩字間應用布林邏輯 NOT", "採用鄰近（Proximity）運算元"], "a": 3}, {"q": "URL（Uniform Resource Locator）是指下列何者？", "options": ["網路資源位址", "網路傳輸協定", "網路標誌語言", "網路使用者名稱"], "a": 0}, {"q": "下列那種網路設備，是用於連接兩種不同通訊協定的網路？", "options": ["橋接器（Bridge）", "路由器（Router）", "閘道器（Gateway）", "中繼器（Repeater）"], "a": 2}, {"q": "臺北市立圖書館設置之「Open Book 智慧圖書館」，主要是下列何種技術的應用？", "options": ["FRBR", "RFID", "SFX", "Web 2.0"], "a": 1}, {"q": "下列有關 Proxy 伺服器的描述，何者錯誤？", "options": ["具有網頁快取的功能", "可節省網路連線時間", "能避免感染電腦病毒", "可加快網頁下載速度"], "a": 2}, {"q": "下列有關 SGML 的描述，何者正確？", "options": ["SGML 是一種程序式標示語言", "SGML 與 HTML、XML 等類似，均為網頁程式設計語言", "SGML 是一種專屬性（proprietary）的商業標準", "SGML 可定義文件結構，並將文件結構與內容分開處理"], "a": 3}, {"q": "下列有關 dark archives 的敘述，何者正確？", "options": ["為提供快速存取服務或作為備用而建置的鏡像網站（mirror sites）", "為永久保存數位資訊內容而建置的數位資訊儲存庫，其內容不開放一般使用者取用", "為聯合國科教文組織（UNESCO）所主導的數位圖書館計畫，典藏十九世紀前中非地區的史料與手稿", "使用者僅能透過網路搜索引擎查詢及擷取其資訊內容"], "a": 1}, {"q": "有關「資源描述架構」（Resource Description Framework，簡稱 RDF）的敘述，下列何者正確？", "options": ["是一種後設資料格式（metadata scheme）的參考模式，其目的在促成不同資料格式之交換", "是一種專為網路視聽資源設計的後設資料架構，最常用於動畫與影音資料的描述", "是以 AACR2 及 FRBR 模式為基礎的描述性編目標準", "是一種網路聯合供稿機制，可提供多個網站即時更新訊息"], "a": 0}, {"q": "MARC、Dublin Core、METS 與 EAD 皆屬於以下何種標準？", "options": ["主題編目（Subject cataloging）", "後設資料（metadata）", "網頁設計（Web design）", "權威控制（authority control）"], "a": 1}, {"q": "下列有關 OAI 的敘述，何者錯誤？", "options": ["是一種架構在 FTP 的應用協定", "主要為解決系統互通性問題", "可整合分散的資料", "是開放式檔案存取協定"], "a": 0}, {"q": "國家圖書館的遠距學園網站主要提供下列何種服務？", "options": ["館際合作", "遠距圖書借閱", "數位參考諮詢", "數位學習"], "a": 3}, {"q": "以下對 RSS（Really Simple Syndication）的敘述，何者正確？", "options": ["訂閱後需主動到每個網站搜尋及閱讀資訊", "訂閱 RSS 時需留下個人基本資料，如地址等", "是用來分發和匯集網頁內容的 XML 格式", "可利用 Acrobat Reader 來閱讀所訂閱的內容"], "a": 2}]}, {"id": "y100-2507", "year": "100", "examName": "100年公務人員特種考試身心障礙人員考試", "level": "五等考試", "category": "圖書資訊管理", "subject": "圖書館學大意", "code": "2507", "questions": [{"q": "下列何者是我國最早成立的全國性館際合作組織？", "options": ["中華民國圖書館學會", "中華民國科技圖書館及資料單位館際合作組織", "中華圖書資訊館際合作組織", "中華民國人文社會圖書館館際合作組織"], "a": 1}, {"q": "館藏資料淘汰的主要目的，不包括下列那一項？", "options": ["節省館藏維護費用", "為提供與他館進行交換", "增加書庫的美觀", "節省空間容納新到館圖書"], "a": 1}, {"q": "根據我國圖書館法之規定，各出版人應於著作物發行時，送存國家圖書館一份，違反者依出版品定價多少倍罰鍰？", "options": ["1 倍", "5 倍", "10 倍", "15 倍"], "a": 2}, {"q": "ISAN 是指下列何者？", "options": ["國際標準圖書號碼", "國際標準叢刊號碼", "國際標準視聽資料號碼", "國際標準錄音錄影資料代碼"], "a": 2}, {"q": "依據圖書館法規定，因館藏毀損滅失、喪失保存價值或不堪使用者，每年在不超過館藏量 3%範圍內，如何處理？", "options": ["不可自行報廢", "應報請主管機關核備", "得自行報廢", "得向主管機關核備"], "a": 2}, {"q": "Charles McClure（1994）認為資訊素養是利用資訊解決問題的能力，除讀寫算等傳統素養外還包括那三種素養？①視覺素養 ②媒體素養 ③網路素養 ④公民素養 ⑤電腦素養", "options": ["①②③", "①②④", "③④⑤", "②③⑤"], "a": 3}, {"q": "根據我國著作權法的規定，圖書館在下列何種情況可重製所收藏的著作？①基於網路分享之要求者 ②基於保存資料之必要者 ③應讀者供個人研究之要求者 ④就難以購得之著作，應同性質機構之要求者", "options": ["①②③", "②③④", "①②④", "①③④"], "a": 1}, {"q": "有關臺灣的公共圖書館史，下列敘述何者錯誤？", "options": ["「建立每一縣市文化中心，包括圖書館、博物館、音樂廳」是蔣經國總統於行政院長任內的第十項建設", "「一鄉鎮一圖書館」的構想於民國 65 年底由臺灣省政府謝東閔主席提出", "民國 88 年縣立文化中心升格為「文化局」，將文化事務獨立出來", "民國 92 年行政院「擴大公共建設方案」，與教育部共同主辦「公共圖書館強化計畫」"], "a": 0}, {"q": "下列何者不是專門圖書館？", "options": ["立法院國會圖書館", "行天宮圖書館", "工研院圖書館", "臺灣神學院圖書館"], "a": 1}, {"q": "有關館藏發展政策的功用，下列敘述何者錯誤？", "options": ["讓主管了解經費之運用", "作為內外溝通的工具", "選擇自動化系統的依據", "館藏發展的規劃文件"], "a": 2}, {"q": "根據 UNESCO 之定義，不滿 50 頁，非正式裝訂的出版品，稱為：", "options": ["期刊", "剪輯資料", "小冊子", "檔案"], "a": 2}, {"q": "書評對圖書館的選書工作，不具備下列那一項功用？", "options": ["評論圖書的品質，可做為選書參考", "出版社的書評具權威性，是選書最佳依據", "可彌補館員本身學科背景之不足", "對於爭議性圖書，藉由評論者看法，可做為選書依據"], "a": 1}, {"q": "下列那一個資料庫不屬於醫學和生命科學領域？", "options": ["EMBR", "EMBASE", "INSPEC", "MEDLINE"], "a": 2}, {"q": "檢索資料庫時，為了提高檢索結果之回收率（recall ratio），可使用下列那一種檢索技巧？", "options": ["利用布林邏輯 AND", "減弱切截的範圍", "增加相關詞", "使用較為狹義的檢索詞彙"], "a": 2}, {"q": "以下何者主要用來查檢美國的博士論文？", "options": ["BIP", "PQDT", "SDOS", "PaperFirst"], "a": 1}, {"q": "下列那一部工具書，可以查到「之」字出現在「論語」書中的位置？", "options": ["論語引得", "論語集目", "論語新解", "論語釋義"], "a": 0}, {"q": "想知道在那一部中國史書中有關於唐太宗的記載，可利用那一部工具書？", "options": ["皇覽", "史記人名索引", "廿五史人名索引", "古今人物別名索引"], "a": 2}, {"q": "以下有關「維基百科」的敘述，何者正確？", "options": ["是一部歷史悠久的百科全書", "出版者是國際知名的參考書出版商", "內容全由各領域的學者專家所撰寫", "重要事件的條目經常很快地就被創建或更新"], "a": 3}, {"q": "圖書館若將 OCLC WorldCat 的館藏地與 Google Map 結合，讓讀者看到藏書地點，是屬於以下何種應用服務？", "options": ["RSS", "Mashup", "RFID", "Tagging"], "a": 1}, {"q": "「食譜」屬於下列那一種參考資源？", "options": ["atlas", "chart", "directory", "manual"], "a": 3}, {"q": "以下那一個系統是合作編目系統？", "options": ["Ask a Librarian", "NetLibrary", "WorldCat", "QuestionPoint"], "a": 2}, {"q": "下列那一個參考問題，館員通常不直接提供答案？", "options": ["關節炎應該吃什麼藥", "憂鬱症的英文學名是什麼", "我國的圖書館法是那一年頒布的", "國外雜誌有沒有臺灣股市的相關報導"], "a": 0}, {"q": "下列那一個系統提供全文傳遞服務？", "options": ["遠距圖書服務系統", "臺灣經濟新報", "全國新書資訊網", "國家圖書館數位隨選視訊系統"], "a": 0}, {"q": "根據 Mason 所提 PAPA 資訊倫理模式，下列何者是以「個人有權不受他人或組織的窺視與干擾的權利」為探討範疇？", "options": ["個人隱私權（Privacy）", "資訊正確性（Accuracy）", "智慧財產權（Property）", "資訊取用權（Access）"], "a": 0}, {"q": "下列那一項圖書館處理讀者抱怨的說明是正確？", "options": ["鼓勵讀者改變抱怨的態度", "可以由讀者抱怨了解讀者需求", "宜採取迴避態度以免麻煩", "不需理會讀者的抱怨"], "a": 1}, {"q": "以下何者是 OCLC 為了描述網路資源而制定的 metadata？", "options": ["CDWA", "Dublin Core", "MARC21", "EAD"], "a": 1}, {"q": "下列對於電子書的敘述，何者正確？", "options": ["需額外加入編目的成本", "數位內容格式固定、無法放大縮小", "電子書的內容主要以文字為主，不使用多媒體", "具快速檢索連結功能、環保、攜帶方便之優點"], "a": 3}, {"q": "下列對圖書館行銷的敘述，何者錯誤？", "options": ["圖書館行銷是指圖書館運用行銷的理念和方法，滿足讀者對其資源的需求", "圖書館行銷是一種資訊需求的管理過程，包括探查讀者的需求及妥善管理圖書館資源", "宣傳與廣告為圖書館行銷的唯一工作，需要投入大量的人力", "圖書館行銷不是一件完全獨立的事情，需要全體人員投入行銷工作"], "a": 2}, {"q": "企業行銷之價格概念應用於公共圖書館行銷，下列敘述何者錯誤？", "options": ["圖書館是非營利組織，其目標在追求圖書館功能的發揮，而不在於盈收", "圖書館的資源和服務之價格，包括製造和遞送的直接和間接花費，或任何的實際費用", "圖書館的經費主要來自政府的稅收，所以使用者付費的概念不適用於圖書館", "圖書館不僅要考量實體服務成本，也需考量讀者的時間與心力成本"], "a": 2}, {"q": "下列那一項有關行銷圖書館服務的論述是正確的？", "options": ["圖書館行銷不是一種交換關係", "圖書館可以由通路面向思考行銷策略", "公共關係與圖書館行銷無關", "行銷可以解決圖書館所有的問題"], "a": 1}, {"q": "「世界書香日暨版權日」（World Book and Copyright Day）是那一天？", "options": ["四月二十二日", "四月二十三日", "十二月一日", "十二月七日"], "a": 1}, {"q": "下列何者屬於 ISO11620 中「讀者認知」（User Perception）評量類別中的績效指標？", "options": ["讀者滿意度", "讀者到訪次數", "讀者所需設備使用率", "讀者所需資料可得性"], "a": 0}, {"q": "依據我國圖書館統計標準（CNS13151）定義，下列何項經費不屬於圖書館的開辦費（Capital expenditure）？", "options": ["館舍擴建", "館藏資料", "人事費用", "家具設備"], "a": 2}, {"q": "下列何者是圖書館將某些業務發包或轉包給其他公司或個人來執行的作法？", "options": ["工作輪調", "館際合作", "委外服務", "業務諮詢"], "a": 2}, {"q": "有關學習型組織的敘述，下列何者錯誤？", "options": ["學習型組織的基本理念源自於彼得聖吉（Peter M. Senge）所著「第五項修練」書中提出的五項新技術", "「第五項修練」書中所謂的五項修練技術是指自我超越、個人學習、改善心智模式、建立共同願景及系統思考", "學習型組織是一種個人及組織藉由不斷學習、創新思考和超越自我，以實現共同願景的一種組織", "圖書館為使全館人員跟得上終身學習時代的發展腳步，可積極推動建立學習型組織，以順應時代環境的變化"], "a": 1}, {"q": "下列何者不屬於圖書館建築中所稱的機能性空間？", "options": ["閱覽室", "書庫", "文教活動區", "樓梯間"], "a": 3}, {"q": "下列有關人事管理的敘述，何者錯誤？", "options": ["人事管理是針對組織內部之人事活動，以科學方法進行研究管理之方案", "組織透過人事管理，希望獲得「人與事的配合」和「人與人的協調」等成效", "人事管理以探討人因工程之相關議題為目的", "人事管理是希望達到求才、育才、用才、留才之目標"], "a": 2}, {"q": "藍芽技術利用下列何種方式互相通訊？", "options": ["紅外線", "雷射光", "無線電波", "紫外線"], "a": 2}, {"q": "下列有關 OCLC 的敘述，何者錯誤？", "options": ["全名為 Online Computer Library Center", "提供線上產品及服務，例如 WorldCat", "英國地區著名的書目中心", "成立於 1967 年"], "a": 2}, {"q": "下列何者是特別為人文與社會學科領域電子文本而設計的後設資料格式？", "options": ["EAD", "TEI", "EDI", "ONIX"], "a": 1}, {"q": "下列有關多媒體檔案格式的敘述，何者正確？", "options": ["JPG 是圖像資料的格式", "GIF 是聲音資料的格式", "MIDI 是視訊資料的格式", "WAV 是地圖資料的格式"], "a": 0}, {"q": "圖書館可利用下列何者分析使用者的網站瀏覽行為？", "options": ["click stream", "page rank", "flaming", "spam"], "a": 0}, {"q": "事先掌握一篇或數篇相關文章，利用這些相關文章找尋更多相關的文章，此種檢索策略稱為：", "options": ["分區組合檢索", "引用文獻滾雪球法", "主題層面連續檢索", "主題層面配對檢索"], "a": 1}, {"q": "未經收信人同意就大量寄發的電子郵件稱為：", "options": ["SPAM", "SMTP", "SOAP", "SRAM"], "a": 0}, {"q": "下列有關 RFID 的敘述，何者正確？", "options": ["RFID 是 Radio Frequency Identification Design 的簡稱", "國內已有應用 RFID 技術的無人圖書館", "RFID 是自動化系統標準協定", "RFID 最適宜應用於圖書館編目"], "a": 1}, {"q": "有關部落格（Blog）的敘述，下列何者正確？", "options": ["任何讀者皆可刪除部落格上的文章", "讀者又稱為部落客（Blogger）", "文章須依主題筆劃排序", "提供讀者與部落客直接互動的機制"], "a": 3}, {"q": "下列何者不是一般數位化文件常用的檔案格式？", "options": ["WORD", "PDF", "TIFF", "MPEG"], "a": 3}, {"q": "下列那一項 RSS 敘述正確？", "options": ["指的是圖書館參考諮詢服務", "是一種消息來源格式規範", "是一種館際互借服務方式", "指的是對數位資源的描述格式"], "a": 1}, {"q": "下列有關數位資訊物件永久典藏技術的描述，何者錯誤？", "options": ["「模擬」（emulation）係保存數位物件原始格式，往後則透過程式來模擬其原始操作環境，進而取用其內部資訊", "「移轉」（migration）是定期將數位物件轉存為最新的資料格式，以利未來的系統得以方便讀取其內部資訊", "「技術保存」（technology preservation）係將數位物件連同其讀取設備同步保存下來，以原始設備讀取其內部資訊", "「封包」（packaging）是將一數位物件拆解為數個傳輸與典藏的基本單位，以提升資料存取速率及資料安全"], "a": 3}, {"q": "下列有關\"American Memory\"的敘述，何者錯誤？", "options": ["善用多媒體，提供學習網頁", "提供中小學教育的參考教材", "涵蓋領域以北美歷史為限", "美國國會圖書館之數位化圖書館計畫"], "a": 2}]}, {"id": "y100-3512", "year": "100", "examName": "100年公務人員初等考試", "level": "初等考試", "category": "圖書資訊管理", "subject": "圖書館學大意", "code": "3512", "questions": [{"q": "被指定負責收藏政府出版品的圖書館稱之為：", "options": ["國會圖書館", "寄存圖書館", "學術圖書館", "公共圖書館"], "a": 1}, {"q": "美國那一個電腦網路集團首度與國際大型圖書館合作，將館藏圖書掃描數位化，開創世界最大的網路數位圖書館，並將數位化著作與世人分享？", "options": ["Alta Vista", "Yahoo", "Google", "Microsoft"], "a": 2}, {"q": "1887 年，何人首創圖書館學院於美國哥倫比亞大學？", "options": ["杜威（Melvil Dewey）", "蘭開斯特（F. W. Lancaster）", "阮甘納桑（S. R. Ranganathan）", "高曼（Michael Gorman）"], "a": 0}, {"q": "出版品依出版過程可分一次文獻及二次文獻。二次文獻指的是：", "options": ["標準法規", "專利", "索引", "研究報告"], "a": 2}, {"q": "下列何者不屬於館藏發展的內容？", "options": ["社區分析", "館藏分析", "館藏淘汰", "館員訓練"], "a": 3}, {"q": "參考書「讀架」的目的是：", "options": ["核對參考書流通紀錄", "逐頁閱讀參考書內容", "檢視參考書是否排列錯誤", "統計參考書的流通量"], "a": 2}, {"q": "下列有關文獻傳遞服務的敘述，何者錯誤？", "options": ["包括透過圖書館向商業機構取得資料", "不包括期刊複印", "通常要包括傳統館際互借", "通常會收取費用"], "a": 1}, {"q": "以記錄某一地方資訊，蒐集地方人士著作為主的出版品，稱為：", "options": ["灰色文獻", "政府出版品", "方志", "黑色文獻"], "a": 2}, {"q": "JCR 所排序的期刊清單是按照？", "options": ["即引指數", "影響係數", "共引係數", "引用指數"], "a": 1}, {"q": "「專題選粹服務」（SDI）是指下列那項服務？", "options": ["大學圖書館為研究生所修之專題課程選擇書目資料", "公共圖書館為讀者選訂閱讀專題的服務", "因應讀者個別需要，選擇最新資訊，並主動、定期提供更新資訊", "自讀者所問過的參考問題中，精選出常問的，張貼公告於實體圖書館或網站上"], "a": 2}, {"q": "教導使用者「防範網路詐欺」是屬於下列何者推廣的範圍？", "options": ["資訊倫理", "資訊檢索", "數位學習", "數位典藏"], "a": 0}, {"q": "一般圖書若有下列何種情況，可以優先考慮淘汰？", "options": ["出版超過十年之舊館藏", "已有電子形式出版之紙本圖書", "資料破損，但修補、裝訂費高於市面上可購新書之價格", "複本"], "a": 2}, {"q": "CIS 是指下列何者？", "options": ["企業識別系統", "圖書館自動化系統", "資訊檢索系統", "資訊管理系統"], "a": 0}, {"q": "2007 年 1 月 1 日啟用的 13 碼國際標準書號，例如 ISBN 978-957-678-431-6，其中那一組號碼指出國別地區或語文代碼？", "options": ["431", "678", "957", "978"], "a": 2}, {"q": "經由加強線上公用目錄的功能與開發資訊過濾系統等，可協助資訊使用者避免什麼現象的發生？", "options": ["資訊超載", "資訊迴避", "資訊貧窮", "資訊困惑"], "a": 0}, {"q": "圖書館學學者 F. W. Lancaster 曾對下列何種觀念再次省思，明確宣示科技不能取代公共服務？", "options": ["Information society", "Virtual society", "Paperless society", "Industrial society"], "a": 2}, {"q": "教育部「邁向學習社會白皮書」之方案五「結合圖書館推動讀書會活動方案」指定先由下列那一類型圖書館體系帶頭推動？", "options": ["學校圖書館", "公共圖書館", "大學圖書館", "專門圖書館"], "a": 1}, {"q": "下列那一個聯盟協助圖書館引進國外各類型資料庫系統，由會員圖書館共享數位資源？", "options": ["全國館際合作聯盟", "全國電子書聯盟", "數位化論文典藏聯盟", "全國學術電子資訊資源共享聯盟"], "a": 3}, {"q": "下列有關專利資訊特性的敘述，那一項錯誤？", "options": ["政府授與專利權人的財產權具有法律效益", "具有新穎性和實用性", "在一國申請後，在全球各國亦具有專利權", "可以避免重複的研發與投資"], "a": 2}, {"q": "根據我國的『圖書館法』，為完整保存國家圖書文獻，全國出版品之法定送存機關是：", "options": ["教育部", "立法院國會圖書館", "行政院新聞局", "國家圖書館"], "a": 3}, {"q": "下列何者可有效地舒緩或解決圖書館典藏空間不足的問題？", "options": ["淘汰最近一年未被使用的館藏", "淘汰不具學術價值的圖書", "採用密集書庫", "減少購書量"], "a": 2}, {"q": "電子期刊，最常見的計價基礎為下列何者？", "options": ["紙本的價格", "使用者的類型", "付款方式", "是否為初次採購"], "a": 0}, {"q": "大英百科全書紙本第 15 版包括下列那三大部分？", "options": ["Alphapaedia, Macropaedia, Micropaedia", "Alphapaedia, Propaedia, Micropaedia", "Propaedia, Macropaedia, Micropaedia", "Propaedia, Alphapaedia, Macropaedia"], "a": 2}, {"q": "下列敘述何者錯誤？", "options": ["在圖書館目錄中納入電子資源的連結即可確保資訊的取用一直暢行無阻", "購買電子資源的合約中對於使用者的身分驗證有嚴格的規定", "資料庫廠商對於使用者的限制最常使用的方法是 IP 的管制", "圖書館目錄中能否連結電子資源的全文常受廠商授權合約內容所影響"], "a": 0}, {"q": "結合二個以上的索引詞彙而形成的新主題為下列那一種索引？", "options": ["層面索引", "分類索引", "組合索引", "字母順序之主題索引"], "a": 2}, {"q": "下列有關組織文化的描述，何者錯誤？", "options": ["組織現行的運作管理方式，不會影響組織既有的文化", "管理者應關注組織文化，並為組織培育新的組織文化", "當組織面臨重大的衝擊與挑戰時，領導者須成功的配合組織的變革", "領導者可以藉著危機或重大事件的處理，來增強組織現有的價值"], "a": 0}, {"q": "何謂資訊落差（information divide）？", "options": ["指讀者取得的資訊品質參差不齊", "指館員為讀者檢索資訊的結果與讀者的期待不同", "指社會中有些人因長期無法公平取用資訊而造成社會成員資訊貧富不均的現象", "指國際間各國政府投入網路資訊基礎建設時，民間企業分配不均的現象"], "a": 2}, {"q": "服務行銷所強調的元素中有 7P，除了產品、通路、價格與促銷外，還強調 3P。下列何者不包括在此 3P 內？", "options": ["程序（Process）", "人員（Person）", "包裝（Package）", "實體呈現（Physical presence）"], "a": 2}, {"q": "下列有關 RSS 的敘述，何者錯誤？", "options": ["全名為 Really Simple Syndication", "以 MARC 為交換格式", "可藉以提供電子報訂閱服務", "是一種資訊推播工具"], "a": 1}, {"q": "下列有關 TQM 的敘述，何者錯誤？", "options": ["TQM 是一種管理過程，它是建立在有組織、全員參與的持續改進作業活動", "TQM 藉由持續不斷的改善組織文化中的各個構面以獲取競爭優勢的全面性整合的努力", "TQM 選定對企業經營極為重要的幾項企業程序加以重新規劃，以求其提高營運的效果", "TQM 用數量方法及人力資源改善組織內各項資源、程序及滿足顧客需求"], "a": 2}, {"q": "DOI 是指下列何者？", "options": ["數位影音交換標準", "數位物件單一識別碼標準", "數位文件的命名標準", "分散式檢索標準"], "a": 1}, {"q": "網站伺服器將資料儲存在使用者端的 PC 硬碟中，方便日後追蹤其在該網站上的活動紀錄為何？", "options": ["Query Log", "Server Log", "Cookie Log", "Proxy Log"], "a": 2}, {"q": "資料庫中共有 100 筆「數位圖書館」的相關資料，使用者在檢索系統中查到其中 60 筆，同時也查到不相關資料 90 筆，請問此檢索系統的求準率（Precision Ratio）為何？", "options": ["90%", "60%", "40%", "20%"], "a": 2}, {"q": "依據我國『國民中學圖書館設立及營運基準』的規定，國民中學圖書館的每年館藏購置費至少應占教學設備費百分之多少以上？", "options": ["百分之十五", "百分之十二", "百分之十", "百分之八"], "a": 0}, {"q": "「合理使用」他人著作不包括下列那一項？", "options": ["不妨礙著作權得逕行使用著作物", "用於保障社會大眾求知的自由", "不需規範得以大量複印（製）供眾使用", "促進知識傳播的公益使命"], "a": 2}, {"q": "圖書館在何種情形之下可根據我國『著作權法』的規定重製館藏著作？", "options": ["應閱覽人供個人研究之要求得重製未經授權之著作", "應館際合作單位使用便利之要求者", "價格昂貴而購置複本困難者", "絕版或基於保存資料之必要者"], "a": 3}, {"q": "1995 年美國圖書館學會新版的圖書館倫理守則，增加的兩個條文是什麼？", "options": ["智慧財產權與追求專業精神", "維護資訊自由與保護讀者隱私權", "避免私人利益與高水準的專業服務", "閱讀自由與公私分明"], "a": 0}, {"q": "在編目規範標準中，由不用的條目指向使用的條目指的是：", "options": ["反見（see from）", "見（see）", "參見（see also）", "反參見（see also from）"], "a": 1}, {"q": "館藏分析是館藏評鑑的主要過程，下列那些是透過館藏分析可以達成的目的？①了解某學科主題的館藏量 ②了解館藏資料的語言別 ③了解館藏的深度和範圍 ④了解讀者使用以及不使用的館藏 ⑤了解讀者使用圖書館的滿意度", "options": ["①②③④", "①②③⑤", "①③④⑤", "②③④⑤"], "a": 0}, {"q": "下列合作館藏發展計畫，何者是美國為完整蒐集外國學術出版品，並以美國國會圖書館為中心的一種集中採訪活動？", "options": ["公共法案 480 號（Public Law 480）", "古騰堡計畫（Gutenberg Project）", "拉丁美洲合作採訪計畫（Latin American Cooperation Acquisitions Program, LACAP）", "研究圖書館中心（Center for Research Libraries）"], "a": 0}, {"q": "下列何者對字源學、文字研究最具權威？", "options": ["Webster's Third New International Dictionary of the English Language", "Longman Modern English Dictionary", "Random House Dictionary of English Language", "The Oxford English Dictionary"], "a": 3}, {"q": "想要查中國歷史發生的重要事件，下列工具書何者最適宜？", "options": ["中國歷史紀年表", "中國歷史年表", "五千年中國歷代世系表", "中國近代史曆表"], "a": 1}, {"q": "下列出現在中文參考資源中的名詞，那一個不是「索引」的同義詞？", "options": ["韻編", "通檢", "總覽", "引得"], "a": 2}, {"q": "視聽資料的著錄特點，下列敘述何者錯誤？", "options": ["著錄來源與一般印刷型資料不同", "題名項資料來源取得不易，需由編目員自訂題名", "需加「資料類型標示」（GMD）來區分視聽媒體的類型", "連續性出版品及電腦檔等資料，不必著錄「資料特殊細節項」"], "a": 3}, {"q": "臺北市立圖書館北投分館被喻為首座綠建築圖書館，請問下列何者為綠建築必備的指標？", "options": ["節能與基地綠化", "減少及回收建築物用水（水資源）與二氧化碳減量", "節能與減少及回收建築物用水（水資源）", "汙水與垃圾改善"], "a": 2}, {"q": "提供讀者尋找資料的方向，告知獲取資訊的途徑是那一類參考書？", "options": ["資料性參考書", "指引性參考書", "政府出版品", "百科全書"], "a": 1}, {"q": "下列有關 SOAP 的敘述，何者錯誤？", "options": ["由 W3C 所製定的簡易物件存取協定", "主要目的為解決跨平台的程式溝通問題", "應用程式可藉 FTP 來進行溝通", "以 XML 為基礎的通訊協定"], "a": 2}, {"q": "視聽資料發生乾裂現象時，最宜調整下列何者？", "options": ["典藏室的濕度", "典藏室的溫度", "儲存櫃的高度", "儲存櫃的深度"], "a": 0}, {"q": "下列有關開放源碼軟體（Open Source Software）的敘述，何者錯誤？", "options": ["不得限制他人自由散布或銷售該軟體", "程式須包含原始碼", "不允許程式被修改", "授權時不得偏頗某特定的技術或是介面"], "a": 2}, {"q": "下列有關我國圖書館建築之敘述，何者正確？", "options": ["進館動線應向左引導", "圖書出納台過高會讓讀者產生疏離感", "空氣調節器的使用最重要的考慮是價格", "圖書館顏色會影響讀者的情緒和集中力，最好以鮮艷色彩為宜"], "a": 1}]}, {"id": "y100-4512", "year": "100", "examName": "100年特種考試地方政府公務人員考試", "level": "五等考試", "category": "圖書資訊管理", "subject": "圖書館學大意", "code": "4512", "questions": [{"q": "下列何者是一般關聯式資料庫常用的查詢語言？", "options": ["Visual Basic", "Java", "SQL", "C++"], "a": 2}, {"q": "下列何種網路型態的傳輸範圍最大？", "options": ["WAN", "LAN", "MAN", "VPN"], "a": 0}, {"q": "下列何者是定義主從架構間資料庫查詢與檢索之服務與語法協定？", "options": ["Z39.9", "Z39.7", "Z39.50", "Z39.2"], "a": 2}, {"q": "下列何者是行銷策略中，以「改變所提供服務內容的管道或場所」來吸引消費者的策略？", "options": ["產品策略", "通路策略", "價格策略", "促銷策略"], "a": 1}, {"q": "有關數位化畫面品質與畫素（pixel）的關係，下列敘述何者正確？", "options": ["畫素越多，畫面品質越高", "畫素越少，畫面品質越高", "畫素越多，畫面品質越差", "畫素的量不影響畫面品質"], "a": 0}, {"q": "下列何者並非參考工具書的特點？", "options": ["有特殊的編排方式", "是治學解問的工具", "適宜全書閱讀", "內容廣泛"], "a": 2}, {"q": "維基百科（Wikipedia）一般最大的特點為何？", "options": ["有撰寫者署名", "內容具權威性", "提供付費查詢", "人人可以撰修內容"], "a": 3}, {"q": "一般機構可依功能等不同因素來分部門作業，下列那一因素較不適用於圖書館？", "options": ["人數", "學科", "地區", "讀者對象"], "a": 0}, {"q": "館員可利用何種工具作為選購圖書、參考資料時的判斷依據？", "options": ["索引", "期刊", "百科全書", "書評"], "a": 3}, {"q": "美國法明敦計畫（Farmington Plan）是那種合作計畫？", "options": ["館際互借", "合作採購", "合作編目", "合作目錄"], "a": 1}, {"q": "有關圖書館處理贈書的原則，下列敘述何者錯誤？", "options": ["圖書館要隨時注意贈書消息", "圖書館應保留對贈書的處理權利", "圖書館對贈書應來者不拒，以免得罪贈書的人", "贈書需要符合圖書館館藏發展政策"], "a": 2}, {"q": "各縣市文化局採購圖書，應依循下列何種現行法規？", "options": ["圖書館法", "政府採購法", "公共圖書館設立及營運基準", "出版法"], "a": 1}, {"q": "UNESCO 訂的世界閱讀日（World Book and Copyright Day）為每年那個月份？", "options": ["1 月", "2 月", "3 月", "4 月"], "a": 3}, {"q": "圖書館學五律（The Five Laws of Library Science）是那一位圖書館學大師所提出？", "options": ["杜威（Melvil Dewey）", "蘭開斯特（F. W. Lancaster）", "阮甘納桑（S. R. Ranganathan）", "高曼（Michael Gorman）"], "a": 2}, {"q": "圖書館組織一般分為採編組、閱覽組、期刊組、參考組、資訊組，是依下列何種方式分組？", "options": ["顧客", "學科", "功能", "資料類型"], "a": 2}, {"q": "依照我國所公告的「著作權法」，攝影、視聽、錄音及表演之著作財產權存續至著作公開發表後多少年？", "options": ["60 年", "50 年", "40 年", "30 年"], "a": 1}, {"q": "1850 年那一個國家「公共圖書館法案」的通過，開啟了公共圖書館立法保障之先驅？", "options": ["美國", "英國", "法國", "加拿大"], "a": 1}, {"q": "圖書館最原始的功能是：", "options": ["提供資訊", "教育讀者", "保存文化", "流通閱覽"], "a": 2}, {"q": "搖籃本（incunabula）是泛指西元多少年前，歐洲活字印刷術發明初期的印刷品？", "options": ["1500 年", "1600 年", "1700 年", "1800 年"], "a": 0}, {"q": "美國國家圖書館事業與資訊科學委員會於 1990 年通過下列何項資訊原則？", "options": ["公共資訊原則", "政府資訊原則", "科技資訊原則", "學術資訊原則"], "a": 0}, {"q": "圖書館選擇網路資源時，在內容方面應注意之原則，下列何者較不適用？", "options": ["資訊的客觀性", "作者的專業背景", "版面的配置", "資料來源的權威性"], "a": 2}, {"q": "在「中文期刊篇目索引影像系統」中，於檢索值中輸入一敘述性句子或研究題目，屬於下列那一種檢索方式？", "options": ["簡易查詢", "詳細查詢", "指令查詢", "自然語言查詢"], "a": 3}, {"q": "想要找出關於明華園歌仔戲的照片，應查詢下列那一個資料庫最為適合？", "options": ["臺灣生態筆記", "臺灣影像", "全國圖書書目資訊網", "臺灣尋根網"], "a": 1}, {"q": "要查詢世界上最高的人須使用下列那一工具書？", "options": ["Guinness Book of World Records", "Genius World Records", "World Great Records", "King's Records"], "a": 0}, {"q": "下列那一個資料庫可查某一期刊在那一個圖書館蒐藏情況？", "options": ["中華民國期刊論文索引", "中文圖書資訊學文獻摘要資料庫", "中華民國出版期刊指南系統", "全國文獻傳遞服務系統"], "a": 3}, {"q": "想要查找古代帝王諡號，下列那一本參考工具書最適宜？", "options": ["中國歷代帝王系譜彙編", "歷代傳記資料索引", "中國歷代名人畫像彙編", "中國地方志目錄"], "a": 0}, {"q": "圖書館進行館際互借時，有下列何項規範？", "options": ["圖書館有義務保護申請者的隱私", "申請影印時，須遵守美國著作權法第 16 條", "館際互借應以紙本傳遞為主", "館際互借的資料不得再續借"], "a": 0}, {"q": "下列何項是一般圖書館參考服務所應有的正確觀念？", "options": ["圖書館員具有提供資訊的義務，資訊的正確性則端賴使用者個人的判斷", "圖書館員不但要提供資訊，對於較難懂之統計及財經報表須對讀者詳盡解說", "不分享、散播讀者的個人借閱紀錄", "如果讀者的問題問的不好，站在教育者的立場，宜批評指教之"], "a": 2}, {"q": "借出圖書到期後，在下列那一情況下，通常不再續借？", "options": ["借閱者為學生", "借閱者為機構首長", "該書已有他人預約", "借閱者曾有罰款紀錄"], "a": 2}, {"q": "在合作參考服務中，圖書館員轉介問題至友館時，通常第一考量因素是友館的：", "options": ["服務深度", "館藏大小", "館藏學科主題", "回答速度"], "a": 2}, {"q": "圖書館放映視聽資料供民眾團體欣賞，必須購置具有何種授權的視聽資料來播放？", "options": ["出租版", "公播版", "家用版", "教育版"], "a": 1}, {"q": "下列何者為我國提供全國圖書聯合目錄的資訊網路？", "options": ["Internet", "NBINet", "TANet", "Hinet"], "a": 1}, {"q": "下列那一個資訊檢索類型指的是「檢索者想找出資料中所有相關文獻」？", "options": ["精確檢索（precision search）", "回現檢索（recall search）", "成本效益檢索（cost-effective search）", "全文檢索（full-text search）"], "a": 1}, {"q": "據我國「公共圖書館建築設備」標準，多人坐的閱覽座位，每一座位所需面積以多少平方公尺為宜？", "options": ["2.3 平方公尺", "2.5 平方公尺", "2.7 平方公尺", "2.9 平方公尺"], "a": 1}, {"q": "下列有關圖書館評鑑的敘述，何者是正確的？", "options": ["以質的評鑑為主，不必計較成本及效益", "以量的評鑑為主，因為質的評鑑無法衡量", "圖書館導向的評鑑比讀者導向的評鑑重要", "應重視讀者導向的評鑑"], "a": 3}, {"q": "下列何者不是經常使用的圖像文件格式？", "options": [".bmp", ".tiff", ".png", ".doc"], "a": 3}, {"q": "1980 年代圖書館以館藏為中心的觀點，開始轉化為以下列何者為中心的概念？", "options": ["系統", "館員", "設備", "使用者"], "a": 3}, {"q": "有關衝突的正面效果，下列敘述何者錯誤？", "options": ["衝突是一種溝通管道", "衝突是管理失敗的證明", "衝突能保持團體自省能力", "衝突可使員工具有改進動力"], "a": 1}, {"q": "那位學者提出館藏選擇的第一個口號「用最少的代價提供最多的讀者最好的圖書」？", "options": ["杜威（Melvil Dewey）", "阮甘納桑（S. R. Ranganathan）", "席拉（Jesse H. Shera）", "高曼（Michael Gorman）"], "a": 0}, {"q": "下列何者可被歸類為群組軟體（Groupware）？", "options": ["Wiki", "WORD", "FrontPage", "RSS"], "a": 0}, {"q": "網路搜尋引擎的檢索結果若依使用者點選率高低排序，是基於何種考量？", "options": ["網頁的正確性", "網頁的熱門性", "網頁的權威性", "網頁的新穎性"], "a": 1}, {"q": "OAI-PMH 使用何種資料與訊息標示語法？", "options": ["HTML", "SGML", "DHTML", "XML"], "a": 3}, {"q": "「少數核心期刊，生產大多數的相關論文」之定律，稱為：", "options": ["布來德福定律（Bradford's Law）", "洛特卡定律（Lotka's Law）", "齊夫定律（Zipf's Law）", "普來斯定律（Price's Law）"], "a": 0}, {"q": "下列那些為圖書館選擇期刊資源的工具？①EBSCOhost ②Books in Print（BIP） ③Magazines for Libraries ④Ulrich's Periodicals Directory ⑤Journal Citation Report（JCR）", "options": ["①②③④", "①②③⑤", "①③④⑤", "②③④⑤"], "a": 2}, {"q": "下列何種期刊會定期提供「國際期刊價格調查資訊」，可作為編列採購期刊預算參考？", "options": ["Booklist", "American Library", "Choice", "Library Journal"], "a": 3}, {"q": "「最小努力原則」用於解釋資訊尋求行為時的意思是：", "options": ["到圖書館的資訊尋求者較缺乏尋找資訊的動機", "圖書館讀者希望所獲得的資訊不需讓館員花費太大的努力", "圖書館讀者希望所有資訊皆可以電子方式取得", "圖書館的讀者會以最經濟的方法找資訊"], "a": 3}, {"q": "關於 RSS 的敘述，下列何者錯誤？", "options": ["展示網站授權標章", "主動提供最新消息", "通知最新文件", "個人化服務"], "a": 0}, {"q": "放映性器材放映影像的亮度通常以流明（Lumen）為標示值，所謂流明是指下列何者所接受的燭光數？", "options": ["每平方吋", "每平方呎", "每立方吋", "每立方呎"], "a": 1}, {"q": "下列關於 Multimedia on Demand 的敘述，何者錯誤？", "options": ["可以利用於遠距教學", "使用端操作不易", "利用網路的串流技術", "高畫質的數位影音內容"], "a": 1}, {"q": "據我國內政部綠建築指標的規定，所謂綠建築圖書館的敘述，何者正確？", "options": ["符合 3 項（含）以上，其中節能與水資源為必備指標", "符合 4 項（含）以上，其中節能與水資源為必備指標", "符合 3 項（含）以上，項目不限", "符合 4 項（含）以上，項目不限"], "a": 1}]}, {"id": "y101-4511", "year": "101", "examName": "101年特種考試地方政府公務人員考試", "level": "五等考試", "category": "圖書資訊管理", "subject": "圖書館學大意", "code": "4511", "questions": [{"q": "下列何者係指公共圖書館之一行政單位，利用特殊運輸設備，為不易親自到圖書館的使用者，在定點提供圖書資訊服務？", "options": ["流通圖書館", "行動圖書館", "館外服務站", "智慧圖書館"], "a": 1}, {"q": "下列有關圖書館尋路地圖之敘述，何者錯誤？", "options": ["位置性地圖應成為圖書館中最重要的尋路地圖，特別是在各樓層或區域之中", "尋路地圖的設置會因館舍性質規模與服務性而有差異", "指引性地圖所占的面積較大，地圖前應有較大的觀看空間", "應使用具有反光性之材料製作，以利讀者對地圖的辨識與閱讀"], "a": 3}, {"q": "下列有關圖書館採行委外服務之概念，那一項敘述錯誤？", "options": ["通常透過合約的簽訂，由館方轉包部分或全部業務予外部機構或廠商代為處理", "國內公共圖書館採用技術服務委外項目包括聘請演講者、說書者與作者", "委外服務招標前需仔細擬訂館方的需求建議書與合約內容", "可以解決人力不足與人員工作負荷量過重的問題"], "a": 1}, {"q": "為提昇圖書館管理效能，向享盛名的企業學習，屬於下列何種管理方法？", "options": ["品管圈", "委外管理", "標竿分析", "資料探勘"], "a": 2}, {"q": "入館讀者相互為爭位而引發口角，館員最需要運用下列那一種管理知識解決問題？", "options": ["人力資源管理", "衝突管理", "知識管理", "行銷管理"], "a": 1}, {"q": "下列何者屬於圖書館開辦費項目之一？", "options": ["圖書館營運費用", "館藏維護費用", "人事費用", "擴建館舍費用"], "a": 3}, {"q": "依據我國「公共圖書館建築設備」標準規定，下列何者為正確之空間規劃原則？", "options": ["讀者、館員與圖書資料動線應交錯設計以利館員協助讀者", "讀者空間規劃宜採封閉式，閱讀席次配置於館藏區", "儘量減少固定隔間，以求彈性利用整體空間", "讀者服務區宜採多個出入口管理"], "a": 2}, {"q": "假設圖書館大樓共八層，每層面積為 1,000 平方公尺，電子計算機中心使用其中的七、八樓及六樓的一半空間，則圖書館建築總面積應提報為多少？", "options": ["8,000 平方公尺", "6,000 平方公尺", "5,500 平方公尺", "5,000 平方公尺"], "a": [0, 2]}, {"q": "某一圖書館特別重視任用親切且具同理心之參考館員為讀者服務，此項措施是為了降低讀者所需付出的那一項成本？", "options": ["心理成本", "機會成本", "時間成本", "金錢成本"], "a": 0}, {"q": "下列那一類參考資源的目的在於查檢與揭示文獻資訊來源？", "options": ["字典", "地圖", "書目", "年表"], "a": 2}, {"q": "下列何者為教育類的文獻資料庫？", "options": ["ERIC", "ABI/INFORM", "HighWire", "EI Village"], "a": 0}, {"q": "下列何者不是由我國國家圖書館所建置的系統？", "options": ["臺灣博碩士論文知識加值系統", "臺灣期刊論文索引系統", "中文電子期刊服務", "全國圖書書目資訊網"], "a": 2}, {"q": "下列何者屬於綜合性統計資料？", "options": ["全民健康保險統計", "中華民國教育統計", "中華民國統計年鑑", "國民所得統計年報"], "a": 2}, {"q": "下列那一部類書的主要功能是提供查檢文章詞藻之用？", "options": ["佩文韻府", "通典", "文獻通考", "冊府元龜"], "a": 0}, {"q": "下列那個聯盟負責協助我國各學術機構徵集電子資源？", "options": ["CALIS", "CALISE", "CONCERT", "CONCORT"], "a": 2}, {"q": "有關創用 CC 授權的敘述，下列何者正確？", "options": ["是一種與著作權法相衝突的授權方式", "是一種僅能在美國主張的授權方式", "奠基於著作權法但又較具彈性的著作權運作模式", "僅能向特定人授權"], "a": 2}, {"q": "下列那一種百科全書於西元 1768 年至 1771 年問世，並於 2012 年宣布停止出版紙本，改為僅出版線上電子版？", "options": ["The Encyclopaedia Britannica", "The Encyclopedia Americana", "The Word Book Encyclopedia", "Funk and Wagnalls Encyclopedia"], "a": 0}, {"q": "相對於公共圖書館，下列何者經常是大學圖書館進階型利用教育課程的主題？", "options": ["資料的分類與排架", "圖書館簡介", "書目管理軟體的使用", "查資料比賽"], "a": 2}, {"q": "下列何者不屬於資訊素養（information literacy）的範疇？", "options": ["問題的界定（task definition）", "資訊搜索策略（information seeking strategies）", "程式設計（programming）", "資訊評估（evaluation）"], "a": 2}, {"q": "下列何者是國際學生能力評量計畫 PISA（the Programme for International Student Assessment）之主要評量對象？", "options": ["十歲學生", "十二歲學生", "十五歲學生", "二十歲學生"], "a": 2}, {"q": "下列何者是我國唯一的學位論文法定寄存圖書館？", "options": ["國立臺中圖書館", "國家圖書館", "國立中央圖書館臺灣分館", "臺中數位圖書館"], "a": 1}, {"q": "英國倫敦的創意店（Idea Store）是指什麼？", "options": ["複合式書店", "公共圖書館", "樂齡中心", "青少年活動中心"], "a": 1}, {"q": "下列何者為虛擬參考服務館員需要的硬技能（hard skills）？", "options": ["同理心", "社群魅力", "人際溝通技能", "資料庫和網路檢索技能"], "a": 3}, {"q": "閱讀起步走（Bookstart）運動最早由那一國發起？", "options": ["美國", "英國", "法國", "加拿大"], "a": 1}, {"q": "錄音資料及影碟片等音樂性資料可申請下列那一個代碼，以利資訊的交換、傳播及管理？", "options": ["ISSN", "ISRC", "ISBN", "ISMN"], "a": 1}, {"q": "視障圖書資源最大宗是什麼？", "options": ["點字書與觸覺輔具", "點字書與電子書", "點字書與有聲書", "點字書與繪本書"], "a": 2}, {"q": "以下何者可查找 SSCI 所收錄之期刊？", "options": ["Web of Science 資料庫", "JSTOR 資料庫", "IEEE 網站", "A&HCI 資料庫"], "a": 0}, {"q": "與統購方式採購資料相比較，閱選訂購具有那一項特性？", "options": ["出版商寄送之資料必須照單全收", "無法確實掌握協議範圍內的出版資料", "可取得較高的購買折扣", "保留決定是否購買之權利"], "a": 3}, {"q": "圖書館資料採購流程中，產生訂單送出後，為了完成採購程序，依序還有那些應處理的工作？", "options": ["整理推薦清單、記錄擬付經費、驗收資料、處理發票", "查證書目資料、確認經費紀錄、處理發票、驗收後處理", "記錄擬付經費、驗收資料、處理發票、驗收後處理", "整理推薦清單、查證書目資訊、聯繫指定書商、處理發票"], "a": 2}, {"q": "圖書館選擇書商或代理商時，通常不考量下列那一因素？", "options": ["資料的急需程度", "可提供的折扣", "書商或代理商的風評", "必須為合作過的書商"], "a": 3}, {"q": "以文獻傳遞方式提供館藏服務，應考量成本效益，成本範圍不包括下列那一項？", "options": ["比較擁有文獻及取得文獻的成本", "讀者等待的時間成本及需付出的經費成本", "館員書目查證及處理成本", "資料提供單位所需付出的成本"], "a": [0, 1, 2, 3]}, {"q": "All-or-Nothing Deal 的銷售策略是指：", "options": ["業者以套裝方式將同一出版社的出版品集中為一單獨產品，圖書館可以依照需要選擇所要訂購的出版品", "業者以套裝方式將同一出版社的出版品集中為一單獨產品，圖書館以照單全收的方式訂購或是完全不訂購", "業者以統一價格提供大量出版品，圖書館必須訂購一定時間，合約期間不得刪除任何資料", "業者以統一價格提供大量出版品，圖書館必須訂購一定時間，合約期間圖書館可以依照需求選擇所需要訂購的出版品"], "a": 1}, {"q": "有關「公共圖書館設立及營運基準」對於館藏資料規模之敘述，下列何者正確？", "options": ["各級公共圖書館應有不同之館藏規模，包括基本規模以及年應增加量", "各級公共圖書館均應具備相同的館藏規模，包括基本規模及年應增加量", "各級公共圖書館應依照人口數訂定基本圖書冊數及期刊種數", "各級公共圖書館應依各類型讀者訂定基本圖書冊數及期刊種數"], "a": 0}, {"q": "有關圖書館以參加聯盟方式取得館藏資料的敘述，下列何者錯誤？", "options": ["結合其他圖書館，談判力量較大", "共同處理訂購業務，減少行政成本", "掌握較多的談判籌碼，可能獲得較高折扣", "圖書館可以將館藏預算逐年減至最低金額"], "a": 3}, {"q": "有關以館藏為基礎之館藏評估法的敘述，下列何者正確？", "options": ["著重圖書館館藏被利用之情況", "著重圖書館館藏符合需求之程度", "著重圖書館館藏可及程度", "著重圖書館館藏數量與深廣度"], "a": 3}, {"q": "下列何者不是同步虛擬參考服務的傳遞方式？", "options": ["即時聊天室", "線上視訊平台", "共同瀏覽（co-browsing）", "電子郵件"], "a": 3}, {"q": "下列何者不屬於數位出版之特性？", "options": ["可轉存不同格式出版", "兼具圖文影音效果", "版面受限於紙張開數大小", "閱讀載體多元"], "a": 2}, {"q": "下列何種數位化資料不會出現在大專校院的機構典藏中？", "options": ["論文預刊本", "教授發表的會議論文", "進行中的研究報告", "圖書館的讀者借閱紀錄"], "a": 3}, {"q": "下列何者不是 Extensible Markup Language（XML）語言的特性？", "options": ["使電子資料交換（electronic data interchange）更有效率", "具備平台獨立性（platform-independent）", "是一種後設語言（meta-language）", "XML 主要應用於非網頁文件的開發"], "a": 3}, {"q": "下列何者不是 Wiki 協作平台的特徵？", "options": ["使用者是閱讀者，也是知識內容的編寫者", "主題內容由使用者共同決定", "是一種開放性的知識服務平台", "主題內容強調單一作者主觀的想法與詮釋"], "a": 3}, {"q": "張三和李四在同一個資訊檢索系統中都鍵入「圖書資訊學」，然而張三想知道的是圖書資訊學的相關系所，李四則想知道圖書資訊學的研究趨勢。兩人針對同一檢索結果會採取不同的相關判斷準則，屬於相關判斷的那一種？", "options": ["主題相關", "心理相關", "邏輯相關", "情境相關"], "a": 3}, {"q": "下列何者不是混搭（Mashup）的特徵？", "options": ["源自於 Web 2.0 的概念", "通常需要藉由 API 軟體取得及組合被混搭的資訊", "僅限於影音資料的彙整", "針對兩個以上的資源或服務進行彙整"], "a": 2}, {"q": "使用者在資訊檢索系統中鍵入 librar*來表示所要尋找的資訊包含所有以 librar 為字根的字，這是屬於資訊檢索系統中的那一種檢索功能？", "options": ["布林邏輯檢索", "切截檢索", "鄰近字檢索", "多語言檢索"], "a": 1}, {"q": "1887 年於哥倫比亞學院（Columbia College）創立第一所圖書館學校（School of Library Economy）的圖書館學教育先驅是誰？", "options": ["威廉遜（Charles Williamson）", "杜威（Melvil Dewey）", "克特（Charles Cutter）", "阮甘納桑（S. R. Ranganathan）"], "a": 1}, {"q": "下列那一項敘述符合我國圖書館館員專業倫理守則的自由原則？", "options": ["館員為維護讀者資訊權益，應抗拒來自政府、商業及宗教等不當之檢查與干涉", "館員應抱持熱忱態度，積極主動為讀者服務及提供各種創新服務", "館員應努力妥善保存各種圖書資訊，促進館際合作及國際文化交流", "館員應本於共有共享原則，不因館員個人因素使服務產生不公平情形"], "a": 0}, {"q": "阮甘納桑（S. R. Ranganathan）提出的圖書館學五律（Five Laws of Library Science）不包括下列那一項？", "options": ["圖書館為全人類服務而存在", "圖書館是一個不斷成長的有機體", "每一位讀者有其書", "節省讀者時間"], "a": 0}, {"q": "下列何者不是中國古代官府藏書目錄？", "options": ["西漢的別錄七略", "東漢的漢書藝文志", "宋代的遂初堂書目", "明代的文淵閣書目"], "a": 2}, {"q": "清代典藏四庫全書的七閣中，下列那一閣開放給民眾閱讀與抄錄？", "options": ["文津閣", "文溯閣", "文淵閣", "文瀾閣"], "a": 3}, {"q": "有關「圖書館」一詞之敘述，下列何者正確？", "options": ["古代中國的圖書館以閣、庫、石室等稱之", "圖書館成為中國專有名詞始於清初天主教傳教士的引進", "英文 library 源自希臘語 librarium 與拉丁語 Bibliontheke", "「圖書館」一詞首見於清光緒梁啟超的書信中"], "a": 0}, {"q": "下列我國圖書館學之專業學會組織，何者最早成立？", "options": ["中國圖書館學會", "中華圖書資訊學教育學會", "中華圖書資訊館際合作協會", "中華資訊素養學會"], "a": 0}]}, {"id": "y101-3505", "year": "101", "examName": "101年公務人員特種考試原住民族考試", "level": "五等考試", "category": "圖書資訊管理", "subject": "圖書館學大意", "code": "3505", "questions": [{"q": "指兒童實際能夠閱讀或書寫之前，對閱讀與書寫的認識，稱為什麼？", "options": ["早期讀寫能力", "敘述能力", "字母知識", "資訊素養"], "a": 0}, {"q": "那一種中國古籍兼具「百科全書」和「資料匯編」的性質？", "options": ["方志", "備檢", "會典", "類書"], "a": 3}, {"q": "下列何者是明清兩代官府的藏書樓？", "options": ["東觀", "弘文館", "文淵閣", "文宗閣"], "a": 2}, {"q": "資料庫中共有 100 筆「數位圖書館」的相關資料，使用者在檢索系統中查到其中 60 筆，同時也查到不相關資料 90 筆，請問此檢索系統的求全率（recall ratio）為何？", "options": ["90%", "60%", "40%", "20%"], "a": 1}, {"q": "圖書館館員將個人有興趣而尚未編目之視聽資料，以檢視內容為由攜回家中供子女欣賞。此行為有違下列那項專業倫理？", "options": ["館員執行職務時，不圖利自己或損害他人", "館員應參與學術活動、吸取新知，增進優質服務", "館員應精確、有效處理圖書館業務，提供最佳服務", "館員應本中立原則，蒐集各種圖書資訊，維護讀者權益"], "a": 0}, {"q": "下列何項敘述不符合我國國家圖書館之功能及現況？", "options": ["依據圖書館法徵集全國圖書資訊", "執行出版品預行編目業務", "提供出版品國際標準錄音/錄影資料代碼（ISRC）的申請及給號作業", "服務對象為全體國民"], "a": 3}, {"q": "有關專門性工商圖書館之敘述，下列何者錯誤？", "options": ["包括企業內部的公司圖書館或資料單位", "包括金融機構與公會附設之圖書館或資料單位", "館藏以圖書為主", "通常提供特殊化且個人化之服務"], "a": 2}, {"q": "根據我國「公共圖書館設立及營運基準」規定，公共圖書館專業人員以不少於全館總員額多少比例為原則？", "options": ["五分之四", "四分之三", "三分之一", "二分之一"], "a": 2}, {"q": "下列有關圖書館空間使用之標示物材料選擇之注意事項，何者敘述錯誤？", "options": ["應具耐久性及可清潔性", "應使用較特殊之材料或技術", "應考慮成品之保養費", "應易於安裝、更替或可重複放置性"], "a": 1}, {"q": "下列有關圖書館館員繼續教育之敘述，何者錯誤？", "options": ["正式管道包含學位進修、在職碩士專班、學分班、讀書會、短期課程", "非正式管道包含研討會、專題會議、說明會、參觀訪問、閱讀專書及工作中學習", "可以提升人力的素質，增進服務內容與品質", "儲備圖書館人力資源，增加個人升遷機會"], "a": 0}, {"q": "下列有關圖書館績效評估之敘述，何者錯誤？", "options": ["「轉換程序」是利用管理功能把圖書館輸入資源轉換成服務", "「輸入」是圖書館投入之各項資源，如人力、經費、規劃程序、設備等", "對照圖書館之既定目標評量圖書館業務進展之程度與其達成之成果", "有助於圖書館預算之通過與人力、物力、財力之妥善分配與運用"], "a": 1}, {"q": "下列那一項不屬於館藏發展政策的功能？", "options": ["有助於評鑑與淘汰館藏", "圖書館內、外部的溝通工具", "維持採訪工作一致性的參考文件", "作為資訊組織工作者的訓練工具"], "a": 3}, {"q": "有關圖書館組織之敘述，下列那一項正確？", "options": ["圖書館需依一致性原則規劃單位或組室名稱", "公共圖書館最常依學科設置分館或閱覽室", "採取資料型式區分為最常見之圖書館組織方式", "圖書館因性質及規模之不同，可依業務機能或學科規劃組織方式"], "a": 3}, {"q": "「國民中學圖書館設立及營運基準」針對館藏規模之規定，不包括下列那一項？", "options": ["年度增加量", "學生人數", "班級數", "年度應編列預算比例"], "a": 1}, {"q": "國際性的圖書館組織 IFLA 全名為何？", "options": ["International Foundation of Library Associations and Institutions", "International Federation of Library Associations and Institutions", "International Forum of Library Associations and Institutions", "International Fund of Library Associations and Institutions"], "a": 1}, {"q": "根據我國圖書館統計標準（CNS 13151），下列有關圖書館建築空間面積計算之敘述，何者正確？", "options": ["展覽室在考試季節改為讀者閱覽室使用，則展覽室面積應計入使用者服務區", "說故事區域面積應計入使用者服務區", "閉架區面積應計入使用者服務區", "圖書館如有委外經營之附設咖啡館，其面積可計入圖書館建築總面積"], "a": 3}, {"q": "國內視障讀者借書可以透過郵局以瞽者郵件寄送到府，所需郵費由誰負擔？", "options": ["圖書館", "郵局", "讀者", "愛盲協會"], "a": 1}, {"q": "美國 ACRL 指的是下列那一類型圖書館的協會組織？", "options": ["公共圖書館", "中小學圖書館", "大學圖書館", "國家圖書館"], "a": 2}, {"q": "杜威（Melvil Dewey）在美國那一所學校設立第一個圖書館學教育課程？", "options": ["芝加哥大學（University of Chicago）", "波士頓學院（Boston College）", "哈佛大學（Harvard University）", "哥倫比亞學院（Columbia College）"], "a": 3}, {"q": "下列何者屬於圖書館學新五律（The New Laws of Library Science）？", "options": ["每一讀者均有其書", "捍衛智慧財產權", "善用網路科技提升服務安全", "圖書館為全人類服務而存在"], "a": 3}, {"q": "中國私人藏書家中，何人以蒐藏宋刻本藏書著稱並創建皕宋樓，而成為晚清四大藏書家之一？", "options": ["陸心源", "瞿紹基", "丁國典", "楊紹和"], "a": 0}, {"q": "何人被譽為印度圖書館之父？", "options": ["甘地（M. Gandhi）", "克魯普斯卡雅（N. Krupskaya）", "泰戈爾（R. Tagore）", "阮甘納桑（S.R. Ranganathan）"], "a": 3}, {"q": "樂齡學習資源中心主要是為誰而設？", "options": ["快樂學習的學齡前兒童", "快樂學習的學齡兒童", "快樂學習的青少年", "快樂學習的老年人"], "a": 3}, {"q": "自助借書機使用通常是屬於下列何種服務？", "options": ["參考服務", "採編服務", "閱覽服務", "視聽服務"], "a": 2}, {"q": "我國國家圖書館以下列何種方式取得學位論文數位版權？", "options": ["專屬有償授權", "專屬無償授權", "非專屬有償授權", "非專屬無償授權"], "a": 3}, {"q": "書目療法主要是服務那種讀者？", "options": ["有情緒困擾之讀者", "身障讀者", "刁難之讀者", "看不懂書目之讀者"], "a": 0}, {"q": "館藏使用權是指圖書館對資料有暫時的使用權利而無永久的擁有權，使用權涵蓋範圍通常不包括下列那一項？", "options": ["以授權合約方式使用電子資源", "透過商業性文獻傳遞服務取得文獻", "在授權範圍內透過館際互借服務取得文獻", "利用取得使用之電子資源提供其他加值服務"], "a": 3}, {"q": "下列那一位圖書館學家以「社會認識論（social epistemology）」的觀點，認為社會是圖書館的支柱，圖書館必須滿足社會需求並對其負責？", "options": ["謝拉（Jesse Hauk Shera）", "費桑恩（Robert A. Fairthorne）", "肯特（Allen Kent）", "懷特（Herbert S. White）"], "a": 0}, {"q": "圖書館應設館藏發展委員會負責館藏發展政策的訂定以及推薦圖書資料的審查。館藏發展委員會參與成員通常不包括下列那一類代表？", "options": ["讀者", "圖書館館員", "學者專家", "書商代表"], "a": 3}, {"q": "採購清單所需填入的資料，通常不包括下列那一個項目？", "options": ["資料名稱", "國際標準號", "出版資訊", "內容頁數"], "a": 3}, {"q": "造成圖書館採購外文資料能力降低的因素通常不包括下列那一項？", "options": ["通貨膨脹", "海外幣值升值", "採購聯盟的成立", "資料價格上揚"], "a": 2}, {"q": "下列那一項通常不是圖書館選擇採購期刊時的主要考量因素？", "options": ["期刊出版目的、範圍以及目標讀者", "內容具參考與研究價值", "符合館藏發展政策的規劃", "期刊刊期的長短"], "a": 3}, {"q": "下列圖書館資料採購流程，首先需處理那一個步驟？", "options": ["書目查證", "產生訂單", "整理推薦清單", "更新經費紀錄"], "a": 2}, {"q": "在數位圖書館環境中，不同的資料處理系統會採用不同的作業平台，也可能使用不同的查詢語言。為了克服這些系統之間異質的差異，需要靠下列何項系統特質？", "options": ["可尋性（findability）", "互通性（interoperability）", "可攜性（portability）", "易用性（usability）"], "a": 1}, {"q": "管理顧問公司 Arthur Anderson 提出知識管理運作公式為「知識乃是人、資訊、科技與共享空間互動關係的綜合體」。下列那一個公式最能夠適切表達上述關於知識管理運作的意涵？K 為知識、P 為人、I 為資訊、T 為科技、S 為分享與傳播：", "options": ["K＝(P+I+T)/S", "K＝(P+I+T)S", "K＝(P-I-T)S", "K＝(P-I-T)/S"], "a": 1}, {"q": "下列何種資訊服務可被歸類為推播式（push）資訊服務？", "options": ["搜尋引擎", "期刊檢索系統", "RSS", "Wikipedia"], "a": 2}, {"q": "除了法規彙編、法規著述、政府公報之外，下列何者亦以提供法規資源為主？", "options": ["研究報告", "商品型錄", "政書", "解釋判例"], "a": 3}, {"q": "依我國圖書館統計標準，下列那些為電子化館藏？①數位文獻 ②電子書 ③電子化期刊 ④資料庫 ⑤線上公用目錄", "options": ["①②③④", "①②④⑤", "①②③⑤", "②③④⑤"], "a": 0}, {"q": "下列何者不屬於機構典藏系統？", "options": ["DSpace", "RSS", "EPrint", "Bepress"], "a": 1}, {"q": "下列何種網路協定機制，可以串連不同圖書資訊系統，透過 metadata 的分析與標準化的陳述語法，使圖書資源的網路超連結能夠有效的引導到目標網址？", "options": ["TCP/IP", "OpenURL", "HTTP", "URI"], "a": 1}, {"q": "某圖書館秉持「每位讀者有其書」的理念，面對服務地區外籍新住民人數逐年增加，基於新住民也是圖書館讀者，因而該館逐年增購外文讀物。該館思維符合下列那項邏輯論述？", "options": ["演繹法", "歸納法", "類比法", "比較法"], "a": 0}, {"q": "下列那一個圖書資訊相關學會的主要任務包括「研討圖書資訊學學制與課程」與「推動圖書資訊學教育之國際合作」？", "options": ["中華民國圖書館學會", "中華圖書資訊學教育學會", "中華資訊素養學會", "中華民國圖書出版事業協會"], "a": 1}, {"q": "下列何者屬於快速型參考（ready reference）資源？", "options": ["書目", "引用索引", "手冊", "摘要"], "a": 2}, {"q": "下列那部百科全書有利用 wiki 系統，讓網友以共建共享的方式編輯與撰寫詞條？", "options": ["臺灣大百科全書", "中華大百科全書", "中國大百科全書智慧藏", "中醫大百科全書"], "a": 0}, {"q": "關於 journal 與 magazine 之敘述，下列何者正確？", "options": ["journal 通常是指學術期刊，很少有廣告", "magazine 的文章都經過同儕審查", "journal 與 magazine 的讀者都設定為社會大眾", "投稿到 journal 的文章通常作者可得到豐厚的稿費"], "a": 0}, {"q": "關於地理資訊資源及其檢索途徑的敘述，下列何者正確？", "options": ["不論其用途為何，地理資料越新越好", "政府提供的旅遊資訊最具參考價值", "地圖種類繁多，應先確認所需要的是觀光地圖、歷史地圖還是空照圖等", "查檢現代地名時，不可能會用到百科全書、年鑑或指南"], "a": 2}, {"q": "下列那一種參考資源與醫學或健康科學無直接相關？", "options": ["MLA", "MEDLINE", "PubMed", "BIOSIS"], "a": 0}, {"q": "切截是檢索資料庫時重要的技巧，下列關於切截的敘述何者正確？", "options": ["有些資料庫系統會自動做切截", "資料庫所使用的切截指令都是在字尾加 * 字號", "切截通常可縮小檢索範圍", "利用左切截可找到更多同義字"], "a": 0}, {"q": "關於網路資源特色的敘述，下列何者錯誤？", "options": ["資源傳播管道多元且方便", "為自發性發行，所以資訊品質較佳", "取用不會受到時間與空間的限制", "更迭閱聽人與傳播者之間的關係"], "a": 1}, {"q": "依照我國「政府出版品管理作業要點」規定，各機關辦理政府出版品授權得採下列那些方式？", "options": ["完整授權或專屬授權", "全部授權或部分授權", "專屬授權或全部授權", "全部授權或指定授權"], "a": 1}]}, {"id": "y101-3512", "year": "101", "examName": "101年公務人員初等考試", "level": "初等考試", "category": "圖書資訊管理", "subject": "圖書館學大意", "code": "3512", "questions": [{"q": "編號以 CNS 為首的國家標準，例如圖書館統計（CNS 13151），是下列那一國公告的國家標準？", "options": ["智利", "加拿大", "中華民國", "哥倫比亞"], "a": 2}, {"q": "每組 ISBN 是由 13 位數碼組成，如：978-957-11-5449-9，其中「978」代表的意義？", "options": ["群體或國別的識別代碼", "出版者（社）的識別號代碼", "書名的識別代碼", "圖書業的識別代碼"], "a": 3}, {"q": "依據我國公共圖書館設立及營運基準的規定，鄉鎮圖書館的基本館藏量為：", "options": ["5,000 冊（件）", "10,000 冊（件）", "15,000 冊（件）", "20,000 冊（件）"], "a": 3}, {"q": "「叢書」的英文是：", "options": ["serial", "series", "serious", "sequence"], "a": 1}, {"q": "下列何者為館藏發展的首要步驟？", "options": ["了解出版市場", "建立交換關係", "尋求贈書對象", "進行社區分析"], "a": 3}, {"q": "下列何者是我國電子化政府入口網站？", "options": ["政府出版資料回應網", "臺灣概覽", "我的 e 政府", "政府文獻資訊網"], "a": 2}, {"q": "關於接受讀者的圖書推薦，下列敘述何者有誤？", "options": ["可透過網路或填寫紙張式推介清單", "儘量填寫完整的書目資料", "接受推薦對圖書館而言是一種負擔", "應填寫推薦人聯絡方式和推薦理由"], "a": 2}, {"q": "有關圖書館標示系統的敘述，下列何者錯誤？", "options": ["標示系統設置的方位最好與出入動線呈平行方向", "館舍入口處最好設有樓層索引及圖書館開放時間表", "各樓層入口處最好設平面配置及現在所在位置圖", "主要通道上最好設有各項服務及設施的方向指引"], "a": 0}, {"q": "《臺灣出版參考工具書書目》由下列何者編印？", "options": ["中華民國圖書館學會", "行政院研究發展考核委員會", "臺北市立圖書館", "國家圖書館"], "a": 3}, {"q": "類書是我國古代參考工具書，係將古籍中記載相同主題的原文資料加以摘錄、彙集，再按照一定的次序編排，下列何者為類書？", "options": ["冊府元龜", "資治通鑑", "辭海", "漢書藝文志"], "a": 0}, {"q": "下列何者最適合用來了解臺灣的新書出版情況？", "options": ["CONCERT", "ebrary", "Google Scholar", "ISBNnet"], "a": 3}, {"q": "關於美國國會圖書館的敘述，下列何者錯誤？", "options": ["建立於 1800 年", "曾經在戰爭中被英國人焚燒毀壞", "退休的美國總統 Thomas Jefferson 曾將私人藏書贈與該館", "位於華盛頓州"], "a": 3}, {"q": "根據我國圖書館法，有關圖書館主管機關，在中央為下列何者？", "options": ["國家圖書館", "行政院文化建設委員會", "教育部", "總統府"], "a": 2}, {"q": "下列何者創辦全球最大書目供用中心 OCLC？", "options": ["加菲爾德（Eugene Garfield）", "魯恩（Hans Peter Luhn）", "克爾格（Frederick Gridley Kilgour）", "費桑恩（Robert A. Fairthorne）"], "a": 2}, {"q": "有關期刊的出版演變，下列說明何者錯誤？", "options": ["split into：代表增刊或特刊", "merged with：將兩種刊物合併成一種刊物", "suspended：暫時停刊", "ceased：宣布停刊"], "a": 0}, {"q": "有關「引用文獻滾雪球法」（citation pearl growing）的敘述，下列何者正確？", "options": ["由回收率再追求回收率", "由精確率再追求精確率", "由回收率再追求精確率", "由精確率再追求回收率"], "a": 3}, {"q": "STEP 分析可以幫助圖書館釐清所處環境的機會與風險，請問其四個英文字母代表的評估構面為何？", "options": ["Strengths、Threats、Experience、Policy", "Social、Technological、Economic、Political", "Structural、Task、Expense、Promotion", "Service、Trust、Earnest、Prospect"], "a": 1}, {"q": "有關「期刊資訊」的敘述，下列何者錯誤？", "options": ["期刊電子化逐漸取代紙本", "雖然檢索工具很多，但沒有統一的檢索軟體", "越來越多檢索工具可從資料庫中直接取得或連結文章全文", "圖書館只要訂購電子期刊，即擁有永久典藏與使用的權利"], "a": 3}, {"q": "有關知識管理的運作公式：KM = (P+K)s，其中\"s\"代表的意義？", "options": ["Scope", "Share", "Source", "Store"], "a": 1}, {"q": "圖書館員指導讀者如何使用電子資源，是屬於下列何種服務範疇？", "options": ["文獻傳遞服務", "專題選粹服務", "圖書館利用教育", "閱讀指導服務"], "a": 2}, {"q": "下列那一個資料庫主要收錄有關「圖書資訊學」的文獻？", "options": ["LISA", "MLA", "LEXIS", "Netlibrary"], "a": 0}, {"q": "行政院主計處網站是查檢我國那一類資訊最便捷的網站？", "options": ["書目資訊", "賦稅資訊", "施政資訊", "統計資訊"], "a": 3}, {"q": "下列那一項有關隱私權的敘述正確？", "options": ["《Policy on Confidentiality of Library Records》是 ALA 於 1980 年代發表的圖書館隱私權政策", "隱私權與資訊自由權相輔相成", "隱私權是指維持使用者個人資訊不外洩的權利", "根據美國愛國者法案《USA Patriot Act》，圖書館員可拒絕提供使用者借閱紀錄給情治人員"], "a": 2}, {"q": "有關隨選視訊系統服務（VOD）的陳述，下列何者正確？", "options": ["將影片資料以宅急便送給使用者，依自己的喜好選擇所欲觀賞的影片", "將影片資料以巡迴車傳送給遍遠地區的使用者，依自己的喜好選擇所欲觀賞的影片", "將影片資料數位化並存於視訊伺服器內，透過網路，供使用者選擇所欲觀賞的節目", "將影片資料數位化，供使用者依自己的喜好，儲存在自己的電腦中"], "a": 2}, {"q": "以下何者關於 MP4 的敘述是正確的？", "options": ["和 MP3 一樣的音質", "和 MP3 一樣無使用上的限制", "是因為音樂版權的問題才產生的技術", "利用改進後的 MPEG-3 AAC 技術對音頻進行壓縮處理"], "a": 2}, {"q": "IR（Institutional Repository，機構典藏）是指：", "options": ["以數位化方式保存學術機構的研究產出", "圖書館間合作典藏淘汰的舊書", "圖書館間合作採購與典藏紙本期刊", "機構檔案室所數位化的機密文件"], "a": 0}, {"q": "圖書館可以使用下列那種自由軟體來開發建置機構典藏系統？", "options": ["Blender", "Capivara", "DSpace", "Free Mind"], "a": 2}, {"q": "目前在機構典藏使用最廣泛的後設資料（Metadata）互通機制為何？", "options": ["OAI", "XML", "DAAL", "EAD"], "a": 0}, {"q": "Web2.0 網站中，下列何者以提供使用者個人管理學術性文章書目功能為主？", "options": ["Flickr", "CiteULike", "iTune", "YouTube"], "a": 1}, {"q": "有關維基百科（Wikipedia）的敘述，下列何者正確？", "options": ["由北歐國家發起", "內容的產生與維護由使用者管理", "僅能反映學者專家意見", "第 15 版是學術版"], "a": 1}, {"q": "根據 IFLA 出版的數位參考服務指南，執行聊天諮詢（chat session）時，下列敘述何者正確？", "options": ["所有的回答需一次完整傳送", "儘量使用專業術語", "使用「是」或「不是」的回答", "澄清使用者的資訊需求"], "a": 3}, {"q": "下列何者是指不需安裝即可直接執行的軟體？", "options": ["套裝軟體", "專屬軟體", "綠色軟體", "商業軟體"], "a": 2}, {"q": "圖書館自動化的系統轉換方式，下列何者最花時間與經費？", "options": ["直接轉換（direct conversion）", "階段式轉換（phased conversion）", "先導式轉換（pilot conversion）", "平行轉換（parallel conversion）"], "a": 3}, {"q": "Endnote 及 RefWorks 屬於何種類型軟體？", "options": ["文書處理", "書目管理", "網頁製作", "簡報製作"], "a": 1}, {"q": "資訊檢索時所謂的「主題相關」，是指使用者所輸入的關鍵字與下列何者一致？", "options": ["資訊需求", "使用情境", "主觀認知", "文件內容"], "a": 3}, {"q": "下列何種資料蒐集方法可以雙向了解讀者的需求及評估其對圖書館的滿意情況？", "options": ["訪談法", "問卷調查", "內容分析法", "借閱紀錄分析法"], "a": 0}, {"q": "將瀏覽網頁時的個人資料儲存在客戶端電腦中，以便下次瀏覽相同網頁時使用的資料稱為：", "options": ["cookie", "password", "session", "uid"], "a": 0}, {"q": "圖書館運用下列何種技術可以判斷出館藏的實際所在位置，有助協尋與定位的功能？", "options": ["Web2.0圖書館自動化系統", "國際標準書碼系統", "館藏資源整合查詢系統", "無線射頻辨識系統"], "a": 3}, {"q": "下列何種技術最常用來檢視圖書館現況、分析自身的優勢與弱勢，以及確定可能擁有的機會與面臨的威脅？", "options": ["CIPP", "PERT", "PDCA", "SWOT"], "a": 3}, {"q": "下列那一個是圖書館「專題選粹服務」的簡稱？", "options": ["ILL", "OPAC", "SDI", "NII"], "a": 2}, {"q": "下列何者為圖書館績效評估之國際標準？", "options": ["ISO 11620", "ISO 11621", "ISO 2709", "ISO 2789"], "a": 0}, {"q": "有關零基預算（Zero-based Budget）編列方法的敘述，下列何者正確？", "options": ["採用某種公式來決定下一年度各項經費的分配", "由上級機構給予下一年度的經費總額，再決定如何分配經費", "每一會計年度開始前，列舉每一項要做的工作及其所需費用，不以過去的預算為根據", "以本年度和上一年度的預算和實際開銷為基礎，再逐項決定下一年度的經費分配"], "a": 2}, {"q": "對圖書館而言，「新進參考館員工作手冊」屬於下列那一種知識資源？", "options": ["組織內部的顯性知識", "組織外部的顯性知識", "組織內部的隱性知識", "組織外部的隱性知識"], "a": 0}, {"q": "下列何者是指「組織成員所共有的一套價值觀、信念及行為模式與行事法則，並為新進成員學習的依據」？", "options": ["組織結構", "組織文化", "組織競爭", "組織條例"], "a": 1}, {"q": "一個好的圖書館行銷計畫（marketing plan）應以下列何者為首要依據？", "options": ["圖書館願景", "圖書館經費", "圖書館人力", "圖書館系統"], "a": 0}, {"q": "快速參考資料可迅速協助讀者找到答案，其內容以事實性資料為主，下列何者屬快速參考資料？", "options": ["索引", "書目", "年鑑", "摘要"], "a": 2}, {"q": "一儲存於資料庫中卻無法直接由搜尋引擎檢索到的資源，一般稱為：", "options": ["語意網（semantic web）", "無限網（unlimited web）", "無線網（wireless web）", "深層網（deep web）"], "a": 3}, {"q": "傳統行銷組合中所謂的 4P，是指下列何者？", "options": ["Product, Price, Place, Promotion", "Product, Process, Price, Promotion", "Process, Price, Place, Promotion", "Price, Place, Process, Product"], "a": 0}, {"q": "下列何種伺服器提供 IP 位址與網域名稱的對照服務？", "options": ["URL", "SMTP", "DNS", "PROXY"], "a": 2}, {"q": "學術資訊的開放取用運動中有所謂「金科」（Gold）與「玉律（綠）」（Green）兩種途徑，下列何者最適宜敘述「金科」的作法？", "options": ["以開放取用的模式經營學術期刊", "促使學術出版商開放授權讓作者進行自我典藏", "學術與研究單位成立機構典藏", "推動國家建立公開取用的學科聯合典藏"], "a": 0}]}];
+
+/* ============ ICONS ============ */
+const ICON_SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+const ICON_MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+const ICON_SHUFFLE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>';
+const ICON_LIST = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>';
+const ICON_RESTART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>';
+
+/* ============ STATE ============ */
+const root = document.getElementById('app');
+let currentTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+document.documentElement.setAttribute('data-theme', currentTheme);
+
+let state = { view: 'home' };
+// quiz state shape when view==='quiz'||'results':
+// { view, bankId, order:[qIdx...], idx, answers:{qIdx:displayPos}, wrongOnly, shuffleQ, shuffleO, qOptOrder:{qIdx:[origIdx x4]} }
+
+/* ============ UTILITIES ============ */
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function shuffleArray(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function getBank(id){ return QUESTION_BANKS.find(b => b.id === id); }
+function getCurrentBank(){ return getBank(state.bankId); }
+function answerSet(q){ return Array.isArray(q.a) ? q.a : [q.a]; }
+function isCorrectPos(q, optOrder, pos){ return answerSet(q).includes(optOrder[pos]); }
+
+/* ============ ACTIONS ============ */
+function goHome(){ state = { view: 'home' }; render(); }
+
+function buildOrder(bank, indices, shuffleQ, shuffleO){
+  const order = shuffleQ ? shuffleArray(indices) : indices.slice();
+  const qOptOrder = {};
+  order.forEach(qi => { qOptOrder[qi] = shuffleO ? shuffleArray([0,1,2,3]) : [0,1,2,3]; });
+  return { order, qOptOrder };
+}
+
+function startQuiz(bankId, opts){
+  opts = opts || {};
+  const bank = getBank(bankId);
+  if (!bank) return;
+  const shuffleQ = !!opts.shuffleQ, shuffleO = !!opts.shuffleO;
+  const indices = bank.questions.map((_, i) => i);
+  const { order, qOptOrder } = buildOrder(bank, indices, shuffleQ, shuffleO);
+  state = { view:'quiz', bankId, order, idx:0, answers:{}, wrongOnly:false, shuffleQ, shuffleO, qOptOrder };
+  render();
+}
+
+function toggleShuffleQ(){ restartWithModes({ shuffleQ: !state.shuffleQ, shuffleO: state.shuffleO }); }
+function toggleShuffleO(){ restartWithModes({ shuffleQ: state.shuffleQ, shuffleO: !state.shuffleO }); }
+function restartWithModes(modes){
+  const bank = getCurrentBank();
+  const baseIndices = state.wrongOnly ? state.order.slice() : bank.questions.map((_,i)=>i);
+  const { order, qOptOrder } = buildOrder(bank, baseIndices, modes.shuffleQ, modes.shuffleO);
+  state = { view:'quiz', bankId: state.bankId, order, idx:0, answers:{}, wrongOnly: state.wrongOnly, shuffleQ: modes.shuffleQ, shuffleO: modes.shuffleO, qOptOrder };
+  render();
+}
+function restartQuiz(){ restartWithModes({ shuffleQ: state.shuffleQ, shuffleO: state.shuffleO }); }
+
+function retryWrong(){
+  const bank = getCurrentBank();
+  const wrongIndices = state.order.filter(qi => {
+    const ans = state.answers[qi];
+    return ans == null || !isCorrectPos(bank.questions[qi], state.qOptOrder[qi], ans);
+  });
+  if (!wrongIndices.length) return;
+  const { order, qOptOrder } = buildOrder(bank, wrongIndices, false, state.shuffleO);
+  state = { view:'quiz', bankId: state.bankId, order, idx:0, answers:{}, wrongOnly:true, shuffleQ:false, shuffleO: state.shuffleO, qOptOrder };
+  render();
+}
+
+function selectOption(pos){
+  const qIdx = state.order[state.idx];
+  if (state.answers[qIdx] != null) return;
+  state.answers[qIdx] = pos;
+  render();
+}
+function goNext(){ if (state.idx < state.order.length - 1){ state.idx++; render(); } }
+function goPrev(){ if (state.idx > 0){ state.idx--; render(); } }
+function jumpTo(pos){ if (pos >= 0 && pos < state.order.length){ state.idx = pos; render(); } }
+function finishQuiz(){ state.view = 'results'; render(); }
+function toggleTheme(){
+  currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  render();
+}
+
+/* ============ RENDER ============ */
+function themeBtn(){
+  return `<button class="icon-btn" data-action="toggle-theme" title="切換深色／淺色模式" aria-label="切換深色／淺色模式">${currentTheme === 'dark' ? ICON_SUN : ICON_MOON}</button>`;
+}
+
+function renderHome(){
+  const cards = QUESTION_BANKS.map((bank, i) => `
+    <article class="bank-card" style="animation-delay:${Math.min(i,10)*30}ms">
+      <div class="bank-card-code">代號 ${escapeHtml(bank.code)}．${escapeHtml(bank.year)}年</div>
+      <h2 class="bank-card-title">${escapeHtml(bank.examName)}</h2>
+      <p class="bank-card-meta">${escapeHtml(bank.level)}．${escapeHtml(bank.subject)}</p>
+      <div class="bank-card-footer">
+        <span class="bank-card-count">${bank.questions.length} 題</span>
+        <div class="bank-card-btns">
+          <button class="btn-text" data-action="start-shuffle" data-bank="${bank.id}">隨機出題</button>
+          <button class="btn-primary" data-action="start" data-bank="${bank.id}">開始測驗 →</button>
+        </div>
+      </div>
+    </article>`).join('');
+
+  root.innerHTML = `
+    <div class="app-shell">
+      <header class="site-header">
+        <div class="brand">
+          <span class="brand-mark">目</span>
+          <div><h1>題庫測驗</h1><p class="tagline">歷屆公職考試練習．圖書館學大意</p></div>
+        </div>
+        <div class="toolbar">${themeBtn()}</div>
+      </header>
+      <main>
+        <p class="catalog-note">目前共 ${QUESTION_BANKS.length} 個題庫，持續新增中——點選任一題庫開始作答。</p>
+        <div class="catalog-grid">
+          ${cards}
+          <div class="bank-card bank-card-empty"><p>更多題庫<br>陸續加入中</p></div>
+        </div>
+      </main>
+    </div>`;
+}
+
+function renderQuiz(){
+  const bank = getCurrentBank();
+  const qIdx = state.order[state.idx];
+  const q = bank.questions[qIdx];
+  const optOrder = state.qOptOrder[qIdx];
+  const answeredPos = state.answers[qIdx];
+  const total = state.order.length;
+  const answeredCount = state.order.filter(qi => state.answers[qi] != null).length;
+  const letters = ['Ａ','Ｂ','Ｃ','Ｄ'];
+
+  const optionsHtml = optOrder.map((origIdx, pos) => {
+    const opt = q.options[origIdx];
+    const isCorrect = answerSet(q).includes(origIdx);
+    let cls = 'option';
+    let bubble = '◯';
+    let tag = '';
+    if (answeredPos != null){
+      if (pos === answeredPos){ bubble = '●'; cls += isCorrect ? ' is-correct' : ' is-incorrect'; }
+      else if (isCorrect){ bubble = '✓'; cls += ' is-correct'; }
+      else { cls += ' is-dim'; }
+      if (isCorrect) tag = '<span class="tag">正解</span>';
+      else if (pos === answeredPos) tag = '<span class="tag">你的答案</span>';
+    }
+    return `<button class="${cls}" data-action="answer" data-pos="${pos}" ${answeredPos!=null?'disabled':''}>
+      <span class="bubble">${bubble}</span>
+      <span class="option-letter">${letters[pos]}</span>
+      <span class="option-text">${escapeHtml(opt)}</span>
+      ${tag}
+    </button>`;
+  }).join('');
+
+  const gridCells = state.order.map((qi, pos) => {
+    let cls = 'cell';
+    if (pos === state.idx) cls += ' is-current';
+    const ans = state.answers[qi];
+    if (ans != null){
+      cls += isCorrectPos(bank.questions[qi], state.qOptOrder[qi], ans) ? ' is-correct' : ' is-incorrect';
+    }
+    return `<button class="${cls}" data-action="jump" data-pos="${pos}" aria-label="第${pos+1}題">${pos+1}</button>`;
+  }).join('');
+
+  root.innerHTML = `
+    <div class="app-shell">
+      <header class="quiz-header">
+        <div class="quiz-title">
+          <button class="link-btn" data-action="home" style="display:block;margin-bottom:6px">← 題庫首頁</button>
+          <h1>${escapeHtml(bank.subject)}</h1>
+          <p class="quiz-meta">代號 ${escapeHtml(bank.code)}．第 ${state.idx+1} / ${total} 題${state.wrongOnly ? '（錯題重練）' : ''}</p>
+        </div>
+        <div class="toolbar">${themeBtn()}</div>
+      </header>
+
+      <div class="mode-row">
+        <button class="mode-btn ${state.shuffleQ ? 'is-active' : ''}" data-action="toggle-shuffle-q">${ICON_SHUFFLE}隨機出題</button>
+        <button class="mode-btn ${state.shuffleO ? 'is-active' : ''}" data-action="toggle-shuffle-o">${ICON_LIST}選項打亂</button>
+        <button class="mode-btn" data-action="restart">${ICON_RESTART}重新開始</button>
+      </div>
+
+      <div class="progress-bar"><div class="progress-fill" style="width:${total ? (answeredCount/total*100) : 0}%"></div></div>
+
+      <main class="question-card" aria-live="polite">
+        <div class="question-num">${String(state.idx+1).padStart(2,'0')}</div>
+        <p class="question-text">${escapeHtml(q.q)}</p>
+        <div class="options" role="group" aria-label="作答選項">${optionsHtml}</div>
+      </main>
+
+      <nav class="quiz-nav">
+        <button class="btn-ghost" data-action="prev" ${state.idx===0?'disabled':''}>← 上一題</button>
+        <button class="link-btn" data-action="finish">查看成績</button>
+        <button class="btn-ghost" data-action="next" ${state.idx===total-1?'disabled':''}>下一題 →</button>
+      </nav>
+
+      <section class="grid-nav">
+        <h2>題盤導覽．已作答 ${answeredCount} / ${total}</h2>
+        <div class="grid-nav-cells">${gridCells}</div>
+      </section>
+    </div>`;
+}
+
+function renderResults(){
+  const bank = getCurrentBank();
+  const total = state.order.length;
+  let correct = 0;
+  const wrongList = [];
+  state.order.forEach(qi => {
+    const ans = state.answers[qi];
+    if (ans != null && isCorrectPos(bank.questions[qi], state.qOptOrder[qi], ans)) correct++;
+    else wrongList.push(qi);
+  });
+  const pct = total ? Math.round(correct/total*100) : 0;
+  const letters = ['Ａ','Ｂ','Ｃ','Ｄ'];
+
+  const reviewHtml = wrongList.length ? `
+    <section class="review">
+      <h2>錯題回顧</h2>
+      <ul class="review-list">
+        ${wrongList.map(qi => {
+          const q = bank.questions[qi];
+          const optOrder = state.qOptOrder[qi];
+          const ans = state.answers[qi];
+          const correctPos = optOrder.findIndex(oi => answerSet(q).includes(oi));
+          const userText = ans != null ? `${letters[ans]}、${escapeHtml(q.options[optOrder[ans]])}` : '未作答';
+          const correctText = answerSet(q).length > 1
+            ? answerSet(q).map(oi => escapeHtml(q.options[oi])).join('　或　')
+            : `${letters[correctPos]}、${escapeHtml(q.options[optOrder[correctPos]])}`;
+          return `<li>
+            <p class="review-q">${String(qi+1).padStart(2,'0')}. ${escapeHtml(q.q)}</p>
+            <p class="review-a">你的答案：${userText}</p>
+            <p class="review-correct">正解：${correctText}</p>
+          </li>`;
+        }).join('')}
+      </ul>
+    </section>` : `<p class="all-correct">全部答對，太厲害了！</p>`;
+
+  root.innerHTML = `
+    <div class="app-shell">
+      <header class="quiz-header">
+        <div class="quiz-title">
+          <button class="link-btn" data-action="home" style="display:block;margin-bottom:6px">← 題庫首頁</button>
+          <h1>${escapeHtml(bank.subject)}</h1>
+          <p class="quiz-meta">代號 ${escapeHtml(bank.code)}．測驗結果</p>
+        </div>
+        <div class="toolbar">${themeBtn()}</div>
+      </header>
+      <main class="results-main">
+        <div class="score-stamp">
+          <div class="score-stamp-ring"><span class="score-num">${correct}</span><span class="score-slash">/</span><span class="score-total">${total}</span></div>
+          <p class="score-pct">答對率 ${pct}%</p>
+        </div>
+        <div class="results-actions">
+          <button class="btn-primary" data-action="restart">重新測驗</button>
+          ${wrongList.length ? `<button class="btn-ghost" data-action="retry-wrong">只練錯題（${wrongList.length}）</button>` : ''}
+          <button class="btn-ghost" data-action="home">返回題庫首頁</button>
+        </div>
+        ${reviewHtml}
+      </main>
+    </div>`;
+}
+
+function render(){
+  if (state.view === 'home') renderHome();
+  else if (state.view === 'quiz') renderQuiz();
+  else if (state.view === 'results') renderResults();
+}
+
+/* ============ EVENTS (delegated, attached once) ============ */
+root.addEventListener('click', e => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const action = btn.dataset.action;
+  if (action === 'home') goHome();
+  else if (action === 'start') startQuiz(btn.dataset.bank, { shuffleQ:false, shuffleO:false });
+  else if (action === 'start-shuffle') startQuiz(btn.dataset.bank, { shuffleQ:true, shuffleO:false });
+  else if (action === 'answer') selectOption(Number(btn.dataset.pos));
+  else if (action === 'prev') goPrev();
+  else if (action === 'next') goNext();
+  else if (action === 'finish') finishQuiz();
+  else if (action === 'jump') jumpTo(Number(btn.dataset.pos));
+  else if (action === 'restart') restartQuiz();
+  else if (action === 'retry-wrong') retryWrong();
+  else if (action === 'toggle-theme') toggleTheme();
+  else if (action === 'toggle-shuffle-q') toggleShuffleQ();
+  else if (action === 'toggle-shuffle-o') toggleShuffleO();
+});
+
+document.addEventListener('keydown', e => {
+  if (state.view !== 'quiz') return;
+  const key = e.key.toLowerCase();
+  const digitMap = {'1':0,'2':1,'3':2,'4':3};
+  const letterMap = {'a':0,'b':1,'c':2,'d':3};
+  if (key in digitMap) selectOption(digitMap[key]);
+  else if (key in letterMap) selectOption(letterMap[key]);
+  else if (e.key === 'ArrowRight') goNext();
+  else if (e.key === 'ArrowLeft') goPrev();
+});
+
+render();
+</script>
+</body>
+</html>
