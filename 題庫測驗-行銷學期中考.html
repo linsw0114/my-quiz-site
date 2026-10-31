@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>題庫測驗．行銷學</title>
+<meta name="description" content="期中考題庫練習－行銷學">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ 設計變數 Design Tokens ============ */
+:root{
+  --paper:#EDE7D6; --paper-alt:#E4DDC8; --card:#F8F4E8;
+  --ink:#22302B; --ink-soft:#5C6660; --line:#CFC6A9;
+  --brass:#8E7B45; --stamp:#A23B2E;
+  --correct:#4C6B47; --incorrect:#A23B2E;
+  --correct-bg:#E3EAE0; --incorrect-bg:#F1E1DB;
+  --radius:4px;
+  --shadow:0 1px 2px rgba(34,42,36,.08),0 3px 10px rgba(34,42,36,.06);
+  --font-display:'Noto Serif TC',serif;
+  --font-body:'Noto Sans TC',sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+}
+[data-theme="dark"]{
+  --paper:#1B1D1A; --paper-alt:#202320; --card:#242621;
+  --ink:#E9E4D3; --ink-soft:#A9A392; --line:#3A3B33;
+  --brass:#C2AA66; --stamp:#C4584A;
+  --correct:#86A876; --incorrect:#C4584A;
+  --correct-bg:#26301F; --incorrect-bg:#32211C;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--ink); font-family:var(--font-body);
+  font-size:16px; line-height:1.65; -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color .25s ease,color .25s ease;
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+button{touch-action:manipulation; font-family:inherit}
+.app-shell{max-width:900px;margin:0 auto;padding:22px 20px 72px}
+
+/* ============ Header ============ */
+.site-header,.quiz-header{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:14px;
+  padding:6px 0 24px;border-bottom:1px solid var(--line);margin-bottom:26px;
+}
+.brand{display:flex;align-items:center;gap:13px;min-width:0}
+.brand-mark{
+  width:44px;height:44px;border-radius:50%;border:2px solid var(--brass);color:var(--brass);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-family:var(--font-display);font-size:19px;font-weight:600;
+}
+.site-header h1,.quiz-title h1{
+  font-family:var(--font-display);font-weight:700;font-size:21px;margin:0 0 3px;
+  letter-spacing:.02em; overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.tagline,.quiz-meta{
+  font-family:var(--font-mono);font-size:12px;color:var(--ink-soft);margin:0;letter-spacing:.03em;
+}
+.quiz-title{min-width:0;flex:1}
+.toolbar{display:flex;gap:7px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+.icon-btn{
+  width:38px;height:38px;border-radius:50%;border:1px solid var(--line);
+  background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:background-color .15s,transform .15s,border-color .15s;position:relative;
+}
+.icon-btn:hover{border-color:var(--brass)}
+.icon-btn:active{transform:scale(.92)}
+.icon-btn.is-active{background:var(--brass);border-color:var(--brass);color:var(--paper)}
+.icon-btn svg{width:17px;height:17px}
+button:focus-visible,.link-btn:focus-visible{outline:2px solid var(--stamp);outline-offset:2px}
+.link-btn{
+  background:none;border:none;color:var(--ink-soft);font-size:13.5px;cursor:pointer;
+  padding:8px 4px;text-decoration:underline;text-underline-offset:3px;white-space:nowrap;
+}
+.link-btn:hover{color:var(--ink)}
+
+/* ============ Catalog (home) ============ */
+.catalog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.bank-card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:19px 18px;display:flex;flex-direction:column;gap:7px;box-shadow:var(--shadow);
+  position:relative; animation:fadeIn .3s ease backwards;
+}
+.bank-card::before{
+  content:'';position:absolute;left:0;top:14px;bottom:14px;width:3px;
+  background:var(--brass);border-radius:0 2px 2px 0;
+}
+.bank-card-code{font-family:var(--font-mono);font-size:11px;color:var(--brass);letter-spacing:.08em}
+.bank-card-title{font-family:var(--font-display);font-size:17px;font-weight:600;margin:0;line-height:1.4}
+.bank-card-meta{font-size:12.5px;color:var(--ink-soft);margin:0}
+.bank-card-footer{margin-top:auto;padding-top:13px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.bank-card-count{font-family:var(--font-mono);font-size:12.5px;color:var(--ink-soft)}
+.bank-card-btns{display:flex;align-items:center;gap:12px}
+.btn-text{background:none;border:none;font-size:12.5px;color:var(--ink-soft);cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:4px 0}
+.btn-text:hover{color:var(--stamp)}
+.bank-card-short{align-self:flex-start;color:var(--brass);font-weight:500}
+.bank-card-empty{border-style:dashed;align-items:center;justify-content:center;text-align:center;color:var(--ink-soft);box-shadow:none;background:transparent}
+.bank-card-empty::before{display:none}
+.catalog-note{font-family:var(--font-mono);font-size:12px;color:var(--ink-soft);margin:0 0 16px}
+
+.btn-primary{
+  font-weight:600;font-size:13.5px;background:var(--ink);color:var(--paper);border:none;
+  border-radius:var(--radius);padding:9px 15px;cursor:pointer;
+  transition:transform .15s,background-color .15s;white-space:nowrap;
+}
+.btn-primary:hover{background:var(--stamp)}
+.btn-primary:active{transform:scale(.97)}
+.btn-ghost{
+  font-weight:600;font-size:13.5px;background:transparent;color:var(--ink);border:1px solid var(--line);
+  border-radius:var(--radius);padding:9px 15px;cursor:pointer;
+  transition:border-color .15s,background-color .15s;
+}
+.btn-ghost:hover{border-color:var(--brass);background:var(--card)}
+.btn-ghost:disabled,.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-ghost.is-active{border-color:var(--brass);background:var(--card);color:var(--brass)}
+
+/* ============ short answers ============ */
+.short-card .question-text{margin-bottom:16px}
+.short-toggle{font-size:12.5px;padding:7px 13px}
+.short-answer{
+  margin-top:16px;padding:13px 16px;border-left:3px solid var(--brass);
+  background:var(--paper);border-radius:0 var(--radius) var(--radius) 0;animation:fadeIn .25s ease;
+}
+.short-answer-label{display:block;font-family:var(--font-mono);font-size:11px;color:var(--brass);letter-spacing:.1em;margin-bottom:5px}
+.short-answer p{margin:0;font-size:15px;line-height:1.7}
+
+/* ============ progress ============ */
+.progress-bar{height:3px;background:var(--line);border-radius:2px;overflow:hidden;margin-bottom:24px}
+.progress-fill{height:100%;background:var(--brass);transition:width .3s ease}
+
+/* ============ mode toolbar (shuffle etc) ============ */
+.mode-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.mode-btn{
+  display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;
+  background:var(--card);color:var(--ink-soft);border:1px solid var(--line);border-radius:20px;
+  padding:7px 13px;cursor:pointer;transition:all .15s;
+}
+.mode-btn:hover{border-color:var(--brass)}
+.mode-btn.is-active{background:var(--brass);border-color:var(--brass);color:var(--paper)}
+.mode-btn svg{width:13px;height:13px}
+
+/* ============ question card ============ */
+.question-card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:26px 24px;box-shadow:var(--shadow);margin-bottom:20px;animation:fadeIn .25s ease;
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.question-num{font-family:var(--font-mono);font-size:12.5px;color:var(--brass);letter-spacing:.1em;margin-bottom:10px}
+.question-text{font-size:18.5px;line-height:1.7;margin:0 0 20px;font-weight:500}
+.options{display:flex;flex-direction:column;gap:9px}
+.option{
+  display:flex;align-items:center;gap:12px;text-align:left;width:100%;
+  padding:12px 15px;border:1px solid var(--line);border-radius:var(--radius);
+  background:var(--paper);cursor:pointer;font-size:15px;color:var(--ink);line-height:1.5;
+  transition:border-color .15s,background-color .15s;
+}
+.option:hover:not(:disabled){border-color:var(--brass)}
+.option:disabled{cursor:default;opacity:1}
+.bubble{font-size:16px;width:18px;flex-shrink:0;text-align:center;color:var(--ink-soft)}
+.option-letter{font-family:var(--font-mono);font-weight:600;color:var(--ink-soft);flex-shrink:0;font-size:14px}
+.option-text{flex:1}
+.tag{font-family:var(--font-mono);font-size:10.5px;padding:3px 8px;border-radius:10px;flex-shrink:0;white-space:nowrap}
+.option.is-correct{border-color:var(--correct);background:var(--correct-bg)}
+.option.is-correct .bubble{color:var(--correct)}
+.option.is-correct .tag{background:var(--correct);color:var(--paper)}
+.option.is-incorrect{border-color:var(--incorrect);background:var(--incorrect-bg)}
+.option.is-incorrect .bubble{color:var(--incorrect)}
+.option.is-incorrect .tag{background:var(--incorrect);color:var(--paper)}
+.option.is-dim{opacity:.55}
+
+.quiz-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;gap:10px}
+
+.grid-nav h2{
+  font-family:var(--font-mono);font-size:12px;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--ink-soft);font-weight:600;margin:0 0 12px;
+}
+.grid-nav-cells{display:flex;flex-wrap:wrap;gap:7px}
+.cell{
+  width:33px;height:33px;border-radius:50%;border:1px solid var(--line);background:var(--card);
+  font-family:var(--font-mono);font-size:11.5px;color:var(--ink-soft);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+}
+.cell:hover{border-color:var(--brass)}
+.cell.is-current{border-color:var(--ink);border-width:2px;color:var(--ink);font-weight:700}
+.cell.is-correct{background:var(--correct);border-color:var(--correct);color:var(--paper)}
+.cell.is-incorrect{background:var(--incorrect);border-color:var(--incorrect);color:var(--paper)}
+
+/* ============ results ============ */
+.results-main{display:flex;flex-direction:column;align-items:center;text-align:center;gap:26px}
+.score-stamp{display:flex;flex-direction:column;align-items:center;gap:6px;margin:10px 0 6px}
+.score-stamp-ring{
+  width:132px;height:132px;border-radius:50%;border:3px double var(--stamp);color:var(--stamp);
+  display:flex;align-items:baseline;justify-content:center;transform:rotate(-5deg);font-family:var(--font-display);
+}
+.score-num{font-size:42px;font-weight:700}
+.score-slash{font-size:20px;margin:0 3px;opacity:.6}
+.score-total{font-size:20px;opacity:.8}
+.score-pct{font-family:var(--font-mono);color:var(--ink-soft);font-size:13.5px;letter-spacing:.05em}
+.results-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.review{text-align:left;width:100%;margin-top:6px}
+.review h2{font-family:var(--font-display);font-size:16.5px;margin:0 0 13px}
+.review-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:13px}
+.review-list li{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:15px 17px}
+.review-q{font-weight:600;margin:0 0 8px;font-size:14.5px}
+.review-a{margin:0 0 4px;font-size:13.5px;color:var(--incorrect)}
+.review-correct{margin:0;font-size:13.5px;color:var(--correct)}
+.all-correct{font-family:var(--font-display);font-size:17px;color:var(--correct)}
+
+@media (max-width:560px){
+  .quiz-title h1,.site-header h1{font-size:17px}
+  .question-text{font-size:16.5px}
+  .catalog-grid{grid-template-columns:1fr}
+  .cell{width:29px;height:29px}
+  .app-shell{padding:16px 14px 60px}
+  .quiz-header,.site-header{gap:10px}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+'use strict';
+
+/* ============ 題庫資料 DATA ============ */
+/* 要新增題庫時：把新的題庫物件加進這個陣列即可（格式同下）。*/
+const QUESTION_BANKS = [{"id": "m115a", "year": "115", "examName": "115A 行銷學期中考題庫", "level": "期中考", "category": "行銷學", "subject": "行銷學", "code": "115A", "questions": [{"q": "Dividing a market into several sections of customers is known as ________.", "options": ["market segmentation", "value engineering", "undifferentiated marketing", "market positioning", "mass customization"], "a": 0}, {"q": "________ are customers who show low potential profitability and little projected loyalty.", "options": ["Butterflies", "Strangers", "True friends", "Barnacles", "True believers"], "a": 1}, {"q": "Which of these questions must be answered to develop a winning marketing strategy?", "options": ["Which online platform should we use to market our products?", "How do we deliver products to customers?", "What is our value proposition?", "What products should we focus on selling?", "How many marketing representatives will we need to hire?"], "a": 2}, {"q": "The ________ concept holds that achieving organizational goals depends on knowing the needs and wants of target markets and delivering the desired satisfactions better than competitors do.", "options": ["production", "selling", "marketing", "societal marketing", "product"], "a": 2}, {"q": "Stew Leonard's has created what has been called the \"Disneyland of Dairy Stores,\" complete with costumed characters, scheduled entertainment, and a petting zoo. It's built 30 additions onto the original store, which now serves more than 300,000 customers each week. This legion of loyal shoppers is largely a result of the store's passionate approach to customer service. Instead of focusing on individual transactions, Stew and his staff are putting a priority on ________.", "options": ["converting \"strangers\" into \"butterflies\"", "attracting \"butterflies\"", "decreasing customer-perceived value", "managing partner relationships", "capturing customer lifetime value"], "a": 4}, {"q": "The use of social media, mobile ads and apps, online video, blogs and other digital platforms to connect with and engage consumers via their digital devices is known as", "options": ["sustainability marketing.", "real-time marketing.", "online engagement.", "the Internet of Things.", "digital and social media marketing."], "a": 4}, {"q": "________ is the total combined customer lifetime values of all the company's current and potential customers.", "options": ["Market share", "Value proposition", "Customer equity", "Customer-perceived value", "Share of customer"], "a": 2}, {"q": "PC manufacturer, Lenovo, focuses on low labor costs and mass distribution to ensure the continuous availability of its products at reasonable prices. Lenovo most likely follows the ________.", "options": ["production concept", "societal marketing concept", "selling concept", "customer-driving marketing concept", "marketing concept"], "a": 0}, {"q": "A customer who is both loyal and profitable is referred to as a ________.", "options": ["barnacle", "butterfly", "stranger", "laggard", "true believer"], "a": 4}, {"q": "Dollar General profitably appeals to families with more modest means. The retailer's approach is most likely referred to as ________.", "options": ["mass distribution", "target marketing", "undifferentiated marketing", "consumer-generated marketing", "cost leadership"], "a": 1}, {"q": "Which of the following is an example of consumer-generated marketing?", "options": ["Fun & Run, a local amusement park, promotes its services by allowing consumers to upload videos and write reviews about the park.", "Cristal, a jewelry store, uses its page on Facebook to provide information about its upcoming products to its customers.", "Barton's, a local pet supply store, rewards frequent buyers with vouchers and exclusive offers.", "Energix, a manufacturer of soft drinks, attracts customers through televised advertisements.", "Figa, a leading provider of athletic shoes, helps its customers customize their shoes on its website and choose personalized settings."], "a": 0}, {"q": "The Walt Disney World Resort doesn't just offer amusement park rides, it uses its famed Disney magic to create carefully orchestrated ________.", "options": ["benefits", "experiences", "service offerings", "values", "wants"], "a": 1}, {"q": "Procter & Gamble's Tide detergent does not attempt to get to know customers personally. Instead, Tide creates engagement and relationships through brand-building advertising, websites, and social media presence. Which of the following types of associations would be most profitable for the firm to develop with these customers?", "options": ["joint ventures", "strategic alliances", "business partnering", "full partnerships", "basic relationships"], "a": 4}, {"q": "________ companies research customers deeply to learn about their desires, gather new product ideas, and test product improvements.", "options": ["Customer-driving", "Functional", "Production-oriented", "Customer-driven", "Societal"], "a": 3}, {"q": "Which of the following transforms marketing strategies into real values for consumers?", "options": ["a firm's value proposition", "customer satisfaction surveys", "customer equity", "share of customer", "the four Ps of marketing"], "a": 4}, {"q": "The ABC, a leading provider of personal computer systems, began manufacturing tablet devices after predicting a future consumer need for portability. Which of the following was most likely implemented by the ABC company?", "options": ["customer-driving marketing", "the selling concept", "the production concept", "sustainable marketing", "the product concept"], "a": 0}, {"q": "Some firms, such as Ben & Jerry's and Unilever, focus on setting themselves apart by being civic minded and socially responsible. These firms are practicing ________.", "options": ["caring capitalism", "socialism", "global marketing", "digital marketing", "financial sustainability"], "a": 0}, {"q": "Which of the following terms refers to a customer's evaluation of the difference between all the benefits and all the costs of a market offering relative to those of competing offers?", "options": ["customer equity", "customer profitability", "customer-perceived value", "share of customer", "customer lifetime value"], "a": 2}, {"q": "Which of these questions is answered by a firm's value proposition?", "options": ["How will I inform my target audience about my products?", "Why should I buy your brand rather than a competitor's?", "Should I use more digital marketing tools or traditional tools?", "What products should I deliver?", "Which markets do I serve?"], "a": 1}, {"q": "________ are the form human needs take as they are shaped by culture and individual personality.", "options": ["Services", "Necessities", "Risks", "Wants", "Benefits"], "a": 3}, {"q": "Many leading business and marketing thinkers are now preaching the concept of \"shared value\" which recognizes that ________ needs, not just economic needs, define markets.", "options": ["individual", "physical", "marketing", "functional", "societal"], "a": 4}, {"q": "A brand's ________ is the set of benefits that it promises to deliver to consumers to satisfy their needs.", "options": ["value proposition", "fringe benefit", "perquisite", "dominant effect", "dividend yield"], "a": 0}, {"q": "Customer-driven marketing is most effective when ________.", "options": ["customers seek new products and technological innovations", "a clear need exists among customers, but the need is difficult to identify", "clear needs exist and customers know what they want", "customers have wants but cannot afford them", "customers do not know what they want but are easily persuaded"], "a": 2}, {"q": "In which of the following circumstances is an organization likely to engage in full partnerships with key consumers?", "options": ["when the market has few customers and high margins", "when the market has a huge number of customers", "when the firm has a large number of low-margin customers", "when the firm has few marketing resources at its disposal", "when the firm has a frequency marketing program"], "a": 0}, {"q": "________ refers to working closely with people inside and outside the company to jointly bring more value to customers.", "options": ["Demand management", "Customer-generated marketing", "Partner relationship management", "Channel value proposition", "Integrated communication"], "a": 2}, {"q": "The selling concept holds that ________.", "options": ["consumers will favor products that offer the most in quality, performance, and innovative features", "consumers will only favor products that are available and highly affordable", "consumers will not buy enough of a firm's products unless the firm undertakes large-scale persuasion and promotion efforts", "achieving organizational goals depends on knowing the needs and wants of target markets and delivering the desired satisfactions better than competitors do", "a company's marketing decisions should consider consumers' wants, the company's requirements, consumers' long-run interests, and society's long-run interests"], "a": 2}, {"q": "According to the five-step model of the marketing process, the final step in marketing is ________.", "options": ["designing a customer-driven marketing strategy", "engaging customers, building profitable relationships, and creating customer delight", "understanding the marketplace and customer needs and wants", "capturing value from customers to create profits and customer equity", "constructing an integrated marketing program that delivers superior value"], "a": 3}, {"q": "According to the five-step model of the marketing process, the first step in marketing is ________.", "options": ["understanding the marketplace and customer needs and wants", "constructing an integrated marketing program that delivers superior value", "engaging customers, building profitable relationships, and creating customer delight", "capturing value from customers to create profits and customer equity", "designing a customer-driven marketing strategy"], "a": 0}, {"q": "To market the cause of suicide prevention, rapper Logic worked with the National Suicide Prevent Lifeline (NSPL) to create a video embedded with his song \"1-800-273-8255,\" the NSPL phone number. This is an example of a marketing offering for a(n) ________.", "options": ["person", "exchange", "product", "idea", "place"], "a": 3}, {"q": "Carla, a team leader in charge of customer relationship management, is planning strategies to improve the profitability of her firm's least profitable but loyal customers. She is also examining methods for \"firing\" customers in this group who cannot be made profitable. To which of the following customer relationship groups do these customers belong?", "options": ["strangers", "innovators", "butterflies", "true friends", "barnacles"], "a": 4}, {"q": "Demetrius scheduled a Zoom meeting with the engineering, production, and finance departments to discuss a new product idea that originated from the marketing department. These internal departments are part of the firm's ________.", "options": ["value chain", "marketing chain", "finance function", "supply chain", "delivery chain"], "a": 0}, {"q": "Which of the following is true of strategic planning in a firm?", "options": ["It occurs at the business-unit, product, and market levels rather than at the corporate level.", "It focuses on the firm's internal environment rather than the external environment.", "It deals with adapting the firm to take advantage of changing marketing opportunities.", "It deals with maintaining the company's current business ventures.", "It involves preparing short-term investment objectives at the product level."], "a": 2}, {"q": "Both product development strategies and diversification strategies involve ________.", "options": ["leaving the current market", "selling in new as well as existing markets", "developing a new product", "selling a company's current products", "selling in a company's current market"], "a": 2}, {"q": "ToyBox is a toy manufacturer based in the United Kingdom. Which of the following indicates that the company is following a market penetration strategy?", "options": ["It introduces its toys in the Indian and Southeast Asian markets.", "It develops a new line of educational software targeted at the current market.", "It acquires toy rights for a popular cartoon character to boost its sales.", "It introduces a line of children's clothing in the United Kingdom.", "It enters the U.S. market with a line of children's clothing."], "a": 2}, {"q": "When viewing the market from a buyer's point of view, \"communication\" corresponds to the ________ component of the marketing mix.", "options": ["place", "promotion", "product", "people", "price"], "a": 1}, {"q": "Vertigo is an electronics company. According to the BCG matrix, which of the following products of Vertigo would most likely classify as a question mark?", "options": ["SoLo-a CD player that has a very low market share in a market that is shrinking rapidly", "Electra-a home entertainment system that has a strong market share in a market that is likely to expand in the future", "Blue-a cell phone that is designed for music lovers and has a very low market share in a market that is growing steadily", "Kindle Fire-a children's iPad that has a high market share in a market that is not expected to grow significantly", "SpinDrive-a car audio system that has a high market share in a market that has been growing constantly"], "a": 2}, {"q": "Marcos is considering business expansion and buying a local business that provides cleanup and sanitation services for local businesses. In his current business he owns 10 food trucks that serve the greater metropolitan area. If he does buy the sanitation business it would be an example of growing his business through ________.", "options": ["market penetration", "diversification", "market development", "adaptation", "product development"], "a": 1}, {"q": "A strategy for company growth that involves increasing sales to current market segments without changing the product is known as ________.", "options": ["diversification", "product development", "market differentiation", "market development", "market penetration"], "a": 4}, {"q": "Which of these macroenvironment forces would be most likely to drive a company to be more environmentally conscious?", "options": ["cultural", "technological", "natural", "economic", "demographic"], "a": 2}, {"q": "Which of the following is a true statement about Baby Boomers?", "options": ["They are the first generation to have grown up with computers.", "They constitute the largest demographic group in the United States.", "They are the wealthiest generation in U.S. history.", "They are the most educated generation of Americans.", "They were born between 1965 and 1976."], "a": 2}, {"q": "Nike's goal to increase sales of its running shoes by 25 percent during the first six months of the new fiscal year is an example of a ________.", "options": ["marketing strategy", "positioning objective", "marketing objective", "target market strategy", "differentiation objective"], "a": 2}, {"q": "The first step in the BCG approach is to ________.", "options": ["invest funds in stars", "define your marketing mix", "milk the cash cows", "divest the dogs", "identify the firm's strategic business units (SBUs)"], "a": 4}, {"q": "________ refers to reducing the business portfolio by abandoning products that no longer fit the company's overall strategy.", "options": ["Downsizing", "Product line extension", "Market segmentation", "Diversification", "Vertical integration"], "a": 0}, {"q": "The overall process of building and maintaining profitable customer relationships by delivering superior customer value and satisfaction is referred to as ________.", "options": ["partner relationship management", "enterprise resource planning", "societal marketing", "perceived-value management", "customer relationship management"], "a": 4}, {"q": "JetBlue's promise that \"Just Alright Doesn't Fly Here\" and their commitment to deliver \"award-winning service from award-winningly nice humans\" is their ________.", "options": ["value proposition", "production concept", "market offering", "selling concept", "segmentation strategy"], "a": 0}, {"q": "________ are defined as states of felt deprivation.", "options": ["Needs", "Values", "Ideas", "Exchanges", "Demands"], "a": 0}, {"q": "Which of the following concepts calls for sustainable marketing?", "options": ["the marketing concept", "the societal marketing concept", "the production concept", "the product concept", "the selling concept"], "a": 1}, {"q": "________ refers to the portion of the customer's purchase that a company gets in its product categories.", "options": ["Customer lifetime value", "Customer equity", "Value proposition", "Brand equity", "Share of customer"], "a": 4}, {"q": "Which of these is an example of real-time marketing?", "options": ["Starbucks collecting customer data on their website", "Procter & Gamble using coupons in the Sunday paper", "Elon Musk tweeting about cryptocurrency", "Taco Bell using navigation apps with directions to nearby stores", "Best Buy making it easy to return unwanted items"], "a": 3}, {"q": "In a SWOT analysis, ________ refer to unfavorable external factors or trends that may present challenges to performance.", "options": ["opportunities", "weaknesses", "strategies", "threats", "strengths"], "a": 3}, {"q": "According to the BCG matrix, products or businesses with a high market share in a high-growth market are classified as ________.", "options": ["dogs", "stars", "cash cows", "heroes", "question marks"], "a": 1}, {"q": "Both market penetration and market development strategies primarily involve ________.", "options": ["selling the company's current products", "leaving the current market", "selling in new as well as existing markets", "developing new products", "modifying the company's product line"], "a": 0}, {"q": "From a marketing perspective, a firm's success depends not only on how well each department performs it's work but also on how well these departments ________.", "options": ["coordinate their activities", "advertise their successes", "utilize their budgets", "implement cost cutting strategies", "isolate to do their jobs"], "a": 0}, {"q": "Packaging is an element of the ________ component of a company's marketing mix.", "options": ["price", "product", "promotion", "people", "place"], "a": 1}, {"q": "Demographic, economic, natural, technological, political, and cultural forces form the ________ of an organization.", "options": ["microenvironment", "supply chain", "marketing intermediary network", "internal environment", "macroenvironment"], "a": 4}, {"q": "Reseller markets consist of ________.", "options": ["firms that buy goods and services to sell at a profit", "individuals who buy goods and services for personal consumption", "firms that buy goods and services for further processing", "government agencies that buy goods and services to produce public services", "firms that buy goods and services to assemble overseas"], "a": 0}, {"q": "The boom in online, mobile, and social media has created a new set of social and ethical issues for companies. Their greatest concern involves ________.", "options": ["protecting the privacy of knowing and unknowing customers", "rarely following the marketing orientation when devising promotional offers online", "providing too many alternative products online which confuses customers", "failing to reach their target customers through online marketing", "failure to provide value-priced products for online customers"], "a": 0}, {"q": "P&G's Tide Loads of Hope program provides mobile laundromats and loads of clean laundry to families in disaster-stricken areas. This is an example of ________ marketing.", "options": ["environmental", "charitable", "ethical", "cause-related", "social"], "a": 3}, {"q": "BlueBear is a shoe manufacturer based in the United States. Which of the following indicates that the company is following a market development strategy?", "options": ["BlueBear employs a British comedian for a U.S. advertising campaign.", "BlueBear develops a line of athletic shoes for its current target market.", "BlueBear adds a line of leather purses to its offerings in the U.S. market.", "BlueBear introduces a line of children's clothing to its current target market.", "BlueBear introduces its shoes in the Indian and Southeast Asian markets."], "a": 4}, {"q": "Which of the following will most likely be included in the \"price\" component of a company's marketing mix?", "options": ["brand name", "inventory", "packaging", "sales promotion", "discounts"], "a": 4}, {"q": "Evaluating the results of marketing strategies and plans and taking corrective action to ensure that the objectives are attained is called ________.", "options": ["marketing implementation", "marketing control", "market targeting", "market planning", "marketing development"], "a": 1}, {"q": "Which of the following best describes a marketing department with a functional organization?", "options": ["Marketing managers are responsible for developing marketing strategies and plans for their specific markets or customers, and the company is organized around the needs of specific customer segments.", "A company creates large teams, or even whole divisions, to serve domestic and international markets.", "Different marketing activities are headed by specialists such as sales managers, advertising managers, marketing research managers, and customer service managers.", "A product manager develops and implements a complete strategy and marketing program for a specific product or brand.", "Sales and marketing people are assigned to specific countries, regions, and districts."], "a": 2}, {"q": "Which component of the marketing mix refers to the goods-and-services combination a company offers to its target market?", "options": ["position", "place", "product", "price", "promotion"], "a": 2}, {"q": "Which of the following companies is using a divesting strategy?", "options": ["Harlow's market share remains steady over two years, and the firm decides to maintain its share at the current level.", "Juggernaut Bikes acquires new businesses in order to increase its market share.", "To achieve a higher market share, LBD Inc. increases investments in advertising and promotion.", "Getix Computers increases the price of its products in order to maximize short-term profits.", "When sales of its clothing division decline, Blackstone sells the division to a competitor."], "a": 4}, {"q": "Recyclable or biodegradable packaging, recycled materials and components, and better pollution controls are ways that marketers have responded to the ________.", "options": ["new recycling laws", "new government intervention program", "environmental sustainability movement", "pollution reduction movement", "increased need to comply with environmental regulations"], "a": 2}, {"q": "The responsibility for setting a company's mission, objectives, broad strategies, and policies primarily lies with its ________.", "options": ["top management", "human resource managers", "research department", "marketing managers", "finance department"], "a": 0}, {"q": "________ refers to the process of evaluating each market segment's attractiveness and selecting one or more segments to enter.", "options": ["Market divesting", "Market targeting", "Market diversification", "Market positioning", "Market mixing"], "a": 1}, {"q": "Which of the following is an example of a local public?", "options": ["a company director who is working to improve the organization's public image", "a community organization that addresses welfare issues in its neighborhood", "a bank that helps a company acquire loans", "a federal regulatory agency that monitors business practices", "a supplier responsible for sourcing most of the raw materials used in production"], "a": 1}, {"q": "Which of the following are examples of internal publics of a company?", "options": ["governmental departments and agencies that regulate businesses", "neighborhood residents and community organizations", "the general public that is directly affected by the company", "newspapers, magazines, television stations, blogs, and other Internet media", "the managers, board of directors, and workers of the company"], "a": 4}, {"q": "A marketing intermediary would most likely help a firm by ________.", "options": ["providing technical expertise on the production and design of goods", "moving the firm's goods from production points to distribution centers", "supplying the raw materials needed for manufacturing the firm's products", "negotiating with labor unions regarding wages, hours, and benefits", "competing directly with the firm in a certain product category"], "a": 1}, {"q": "________ marketing is defined as socially and environmentally responsible marketing that meets the present needs of consumers and businesses while also preserving or enhancing the ability of future generations to meet their needs.", "options": ["Sustainable", "Mass", "Ambush", "Customer-driven", "Customer-driving"], "a": 0}, {"q": "Abel now has the buying power to purchase the computer that he wanted to buy six months ago. Abel's want has most likely become a ________.", "options": ["value", "desire", "need", "market offering", "demand"], "a": 4}, {"q": "Marketing, more than any other business function, deals with ________.", "options": ["sales", "brands", "new products", "customers", "advertising"], "a": 3}, {"q": "The ultimate aim of customer relationship management is to ________.", "options": ["turn \"strangers\" into \"butterflies\"", "evaluate current sales share", "produce high customer equity", "divide markets into distinct segments", "evaluate customer lifetime value"], "a": 2}, {"q": "________ is the art and science of choosing target markets and building profitable relationships with those markets.", "options": ["Marketing management", "Differentiation", "Segmentation", "Customer-perceived value", "Positioning"], "a": 0}, {"q": "The societal marketing concept holds that ________.", "options": ["achieving organizational goals depends on knowing the needs and wants of target markets and delivering the desired satisfactions better than competitors do", "consumers will favor products that offer the most in quality, performance, and innovative features", "a company's marketing decisions should focus on creating economic value in a way that also creates value for the surrounding environment", "the society will only favor products that are available and highly affordable", "consumers will not buy enough of a firm's products unless the firm undertakes a large-scale selling and promotion effort"], "a": 2}, {"q": "Which of the following best describes a company's business portfolio?", "options": ["the target segments of the company's various businesses", "the list of all the marketing activities in which the company invests", "the company's products or services in a particular market", "the collection of businesses and products that make up the company", "the company's strengths in terms of technology, people, and products"], "a": 3}, {"q": "Cosmetics firm SatinSilk is revamping its mission statement and advertising strategy. The CEO stresses that the new mission statement should be market-oriented rather than product-oriented. Which of the following mission statements will best suit the company?", "options": ["to sell hypoallergenic cosmetics products made only from the finest organic ingredients", "to create the best possible products and sell them at the best possible prices", "to increase our market share in the cosmetics segment and increase profit margins", "to become a market leader in every cosmetics product category", "to give customers the complexion they dream about by providing products suited to their needs"], "a": 4}, {"q": "The process that turns marketing plans into marketing actions to accomplish strategic marketing objectives is called marketing ________.", "options": ["control", "analysis", "design", "implementation", "planning"], "a": 3}, {"q": "Which of these might be a reason for a firm to downsize?", "options": ["The high profits will quickly attract competition.", "The firm has grown too fast.", "The BCG matrix classified the SBU incorrectly.", "The products are selling too quickly.", "The product line should not be extended."], "a": 1}, {"q": "Jim's Hardware relies on its ________, which is a series of internal departments that carry out value-creating activities to design, produce, market, deliver, and support a firm's products.", "options": ["internal value chain", "internal supply chain", "distributor chain", "supplier networks", "portfolio network"], "a": 0}, {"q": "Which of the following best describes the value chain of a company?", "options": ["the series of departments that design, produce, market, deliver, and support the company's products", "the collection of businesses and products that make up the company", "a network made up of the company, its suppliers, and its distributors working together to deliver customer value", "profits earned by the cash cows and stars in the company's business portfolio", "touchpoints at which a company or brand interacts with its consumers"], "a": [0, 4]}, {"q": "The two dimensions the BCG approach uses to evaluate and manage SBUs are ________.", "options": ["market growth rate and market penetration", "market growth rate and market development", "relative market share and market penetration", "market growth rate and relative market share", "relative market share and product development"], "a": 3}, {"q": "Which of the following best describes positioning?", "options": ["dividing a market into distinct groups of buyers who have different needs, characteristics, or behaviors", "differentiating a market offering to create superior customer value", "evaluating each market segment's attractiveness and selecting one or more segments to enter", "arranging for a product to occupy a clear, distinctive, and desirable place relative to competing products", "identifying consumer needs and creating a product to meet those needs"], "a": 3}, {"q": "The citizen-action publics in a company's marketing environment include ________.", "options": ["environmental groups", "government trade agencies", "stockholders and investment analysts", "employees and managers of the company", "news channels"], "a": 0}, {"q": "Which of the following is most likely categorized as a business market?", "options": ["retail outlets that buy goods and services to sell at discounted prices", "firms that buy goods and services for further processing", "individuals who buy goods and services for personal consumption", "government agencies that buy goods and services to produce public services", "firms that buy goods and services to resell for profit"], "a": 1}, {"q": "Which government agency is in charge of ensuring that new products are safe for consumers?", "options": ["The Food and Drug Administration", "The Federal Reserve", "The Consumer Product Safety Commission", "The U.S. Product Safety Agency", "The Bureau of Consumer Protection"], "a": 2}, {"q": "The ________ environment is perhaps the most dramatic force shaping the destiny of individuals and offering exciting opportunities for marketers.", "options": ["social", "cultural", "technological", "demographic", "political"], "a": 2}, {"q": "When a company chooses to harvest a particular strategic business unit, it ________.", "options": ["invests just enough in the strategic business unit to keep its market share at the current level", "increases short-term cash flow despite the long-term effect", "invests more in the strategic business unit to build its market share", "gradually increases investment in the strategic business unit over time to maximize profits", "increases the advertising budget for that strategic business unit"], "a": 1}, {"q": "A firm's decision to identify and develop new markets for existing products is a ________ strategy.", "options": ["market penetration", "diversification", "product development", "market development", "market differentiation"], "a": 3}, {"q": "Which of the following is true of marketing ROI?", "options": ["Marketing ROI cannot be assessed in terms of standard marketing performance measures, such as brand awareness, sales, or market share.", "Marketing ROI measures the profits generated by investments in marketing activities.", "Marketing ROI uses only those marketing factors that can be measured in dollars.", "Marketing ROI is easier to calculate than financial ROI.", "Marketing ROI ignores customer-centered measures of marketing impact, such as customer acquisition and retention."], "a": 1}, {"q": "In the BCG growth-share matrix, question marks refer to products or businesses with a ________.", "options": ["high market share in a market with a high growth rate", "low market share in a market that is set to shrink significantly", "greater market share than all their competitors combined in a saturated market", "low market share in a niche market", "low market share in a market with high growth prospects"], "a": 4}, {"q": "The ABC Company manufactures microprocessors and caters exclusively to private manufacturers that produce high-end computers. Which type of market does ABC directly target?", "options": ["consumer market", "government market", "retail market", "reseller market", "business market"], "a": 4}, {"q": "Which of the following is most likely a characteristic of firms that adopt a reactive approach toward the marketing environment?", "options": ["They passively accept the marketing environment and do not try to change it.", "They take aggressive actions to affect the marketing environment.", "They develop strategies to change the marketing environment.", "They view the marketing environment as a controllable element.", "They do not accept the marketing environment as it is."], "a": 0}, {"q": "Which of the following has the primary function of helping a company target and promote its products to the right markets?", "options": ["credit companies", "physical distribution firms", "service providers", "resale marketers", "marketing services agencies"], "a": 4}, {"q": "Ursa Martin, a book publisher, has decided to work with Hope in Children, a charity foundation that helps feed and educate children in poor countries. Ursa Martin has decided that a percentage of revenue from every book it sells will go to the charity. The books are marketed by conveying this message to customers. Which of the following marketing techniques describes Ursa Martin's association with Hope in Children?", "options": ["joint venture marketing", "green marketing", "niche marketing", "cause-related marketing", "test marketing"], "a": 3}, {"q": "Changes in variables, such as income, cost of living, interest rates, and savings and borrowing patterns most likely reflect changes in the ________ environment of a company.", "options": ["natural", "demographic", "economic", "political", "cultural"], "a": 2}, {"q": "Which of the following represents a change in the technological environment of a marketing firm?", "options": ["increased use of value marketing techniques and promotions", "increased need to engage in mass marketing over market segmentation", "increased need to comply with environmental regulations", "increased use of RFID systems to track products", "increased use of cause-related marketing"], "a": 3}, {"q": "A consumer advocacy group challenges a firm's decision to build a new warehouse in a small community. The advocacy group is an example of a ________ public.", "options": ["local", "media", "financial", "government", "citizen-action"], "a": 4}, {"q": "Disruption in the marketing environment ________.", "options": ["appears to have accelerated in the past few years", "first appeared due to the Covid-19 pandemic", "has little impact on product mix or delivery", "has little impact on most firms", "did not affect firms until the year 2000"], "a": 0}], "shortAnswers": [{"q": "Describe and compare the four types of customers classified by their potential profitability to an organization. Identify how an organization should manage each type of customer.", "a": "Strangers: low loyalty and profit—avoid investment. Butterflies: low loyalty, high profit—maximize transactions. True friends: high loyalty and profit—build relationships. Barnacles: high loyalty, low profit—improve profitability or discontinue service."}, {"q": "Define marketing planning. Briefly outline what a company should cover in its marketing plan.", "a": "Marketing planning sets strategies to achieve business goals. A marketing plan includes an executive summary, situation (SWOT) analysis, objectives, marketing strategy, action programs, budget, and controls."}, {"q": "Describe the major trends in the natural environment that marketers need to be aware of.", "a": "Major trends include shortages of natural resources, increasing pollution, and greater government intervention in environmental protection."}, {"q": "Explain why marketing is not simply \"making a sale.\"", "a": "Marketing focuses on understanding customer needs, creating value, and building relationships. Selling is only one part of the overall marketing process."}, {"q": "What is one concern marketers should be aware of when marketing to Generation Alpha?", "a": "Marketers must protect children's privacy and avoid exploiting their vulnerability to advertising through responsible, age-appropriate marketing."}, {"q": "Compare and contrast customer-managed relationships and consumer-generated marketing.", "a": "Customer-managed relationships give consumers greater control over brand interactions. Consumer-generated marketing involves consumers creating and sharing brand-related content and experiences. Both increase consumer influence."}, {"q": "Raintree Developers has been measuring its marketing return on investment (or marketing ROI) to assess its marketing performance for the past few years. Explain why this method may not accurately reflect the company's performance and what Raintree can use to better estimate its performance.", "a": "Marketing ROI may overlook benefits that are difficult to measure financially. Companies should also track brand awareness, customer acquisition, retention, and customer lifetime value."}, {"q": "Briefly explain the societal marketing concept.", "a": "Societal marketing balances company profits, consumer needs, and society's long-term well-being through socially and environmentally responsible marketing."}]}];
+
+/* ============ ICONS ============ */
+const ICON_SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+const ICON_MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+const ICON_SHUFFLE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>';
+const ICON_LIST = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>';
+const ICON_RESTART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>';
+
+/* ============ STATE ============ */
+const root = document.getElementById('app');
+let currentTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+document.documentElement.setAttribute('data-theme', currentTheme);
+
+let state = { view: 'home' };
+// quiz state shape when view==='quiz'||'results':
+// { view, bankId, order:[qIdx...], idx, answers:{qIdx:displayPos}, wrongOnly, shuffleQ, shuffleO, qOptOrder:{qIdx:[origIdx x N]} }
+
+/* ============ UTILITIES ============ */
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function shuffleArray(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function getBank(id){ return QUESTION_BANKS.find(b => b.id === id); }
+function getCurrentBank(){ return getBank(state.bankId); }
+function answerSet(q){ return Array.isArray(q.a) ? q.a : [q.a]; }
+function isCorrectPos(q, optOrder, pos){ return answerSet(q).includes(optOrder[pos]); }
+
+/* ============ ACTIONS ============ */
+function goHome(){ state = { view: 'home' }; render(); }
+
+function buildOrder(bank, indices, shuffleQ, shuffleO){
+  const order = shuffleQ ? shuffleArray(indices) : indices.slice();
+  const qOptOrder = {};
+  order.forEach(qi => {
+    const base = bank.questions[qi].options.map((_, i) => i);
+    qOptOrder[qi] = shuffleO ? shuffleArray(base) : base;
+  });
+  return { order, qOptOrder };
+}
+
+function startQuiz(bankId, opts){
+  opts = opts || {};
+  const bank = getBank(bankId);
+  if (!bank) return;
+  const shuffleQ = !!opts.shuffleQ, shuffleO = !!opts.shuffleO;
+  const indices = bank.questions.map((_, i) => i);
+  const { order, qOptOrder } = buildOrder(bank, indices, shuffleQ, shuffleO);
+  state = { view:'quiz', bankId, order, idx:0, answers:{}, wrongOnly:false, shuffleQ, shuffleO, qOptOrder };
+  render();
+}
+
+function toggleShuffleQ(){ restartWithModes({ shuffleQ: !state.shuffleQ, shuffleO: state.shuffleO }); }
+function toggleShuffleO(){ restartWithModes({ shuffleQ: state.shuffleQ, shuffleO: !state.shuffleO }); }
+function restartWithModes(modes){
+  const bank = getCurrentBank();
+  const baseIndices = state.wrongOnly ? state.order.slice() : bank.questions.map((_,i)=>i);
+  const { order, qOptOrder } = buildOrder(bank, baseIndices, modes.shuffleQ, modes.shuffleO);
+  state = { view:'quiz', bankId: state.bankId, order, idx:0, answers:{}, wrongOnly: state.wrongOnly, shuffleQ: modes.shuffleQ, shuffleO: modes.shuffleO, qOptOrder };
+  render();
+}
+function restartQuiz(){ restartWithModes({ shuffleQ: state.shuffleQ, shuffleO: state.shuffleO }); }
+
+function retryWrong(){
+  const bank = getCurrentBank();
+  const wrongIndices = state.order.filter(qi => {
+    const ans = state.answers[qi];
+    return ans == null || !isCorrectPos(bank.questions[qi], state.qOptOrder[qi], ans);
+  });
+  if (!wrongIndices.length) return;
+  const { order, qOptOrder } = buildOrder(bank, wrongIndices, false, state.shuffleO);
+  state = { view:'quiz', bankId: state.bankId, order, idx:0, answers:{}, wrongOnly:true, shuffleQ:false, shuffleO: state.shuffleO, qOptOrder };
+  render();
+}
+
+function selectOption(pos){
+  const qIdx = state.order[state.idx];
+  if (state.answers[qIdx] != null) return;
+  if (!(pos >= 0 && pos < state.qOptOrder[qIdx].length)) return;
+  state.answers[qIdx] = pos;
+  render();
+}
+function goNext(){ if (state.idx < state.order.length - 1){ state.idx++; render(); } }
+function goPrev(){ if (state.idx > 0){ state.idx--; render(); } }
+function jumpTo(pos){ if (pos >= 0 && pos < state.order.length){ state.idx = pos; render(); } }
+function finishQuiz(){ state.view = 'results'; render(); }
+function startShort(bankId){ if (!getBank(bankId)) return; state = { view:'short', bankId, shortOpen:{} }; render(); }
+function toggleShort(i){ state.shortOpen[i] = !state.shortOpen[i]; render(); }
+function toggleShortAll(){
+  const n = (getCurrentBank().shortAnswers || []).length;
+  const allOpen = n > 0 && Array.from({length:n}, (_, i) => i).every(i => state.shortOpen[i]);
+  state.shortOpen = {};
+  if (!allOpen) for (let i = 0; i < n; i++) state.shortOpen[i] = true;
+  render();
+}
+function toggleTheme(){
+  currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  render();
+}
+
+/* ============ RENDER ============ */
+function themeBtn(){
+  return `<button class="icon-btn" data-action="toggle-theme" title="切換深色／淺色模式" aria-label="切換深色／淺色模式">${currentTheme === 'dark' ? ICON_SUN : ICON_MOON}</button>`;
+}
+
+function renderHome(){
+  const cards = QUESTION_BANKS.map((bank, i) => `
+    <article class="bank-card" style="animation-delay:${Math.min(i,10)*30}ms">
+      <div class="bank-card-code">代號 ${escapeHtml(bank.code)}．${escapeHtml(bank.year)}年</div>
+      <h2 class="bank-card-title">${escapeHtml(bank.examName)}</h2>
+      <p class="bank-card-meta">${escapeHtml(bank.level)}．${escapeHtml(bank.subject)}</p>
+      ${bank.shortAnswers && bank.shortAnswers.length ? `<button class="btn-text bank-card-short" data-action="short" data-bank="${bank.id}">另附簡答題 ${bank.shortAnswers.length} 題 →</button>` : ''}
+      <div class="bank-card-footer">
+        <span class="bank-card-count">${bank.questions.length} 題</span>
+        <div class="bank-card-btns">
+          <button class="btn-text" data-action="start-shuffle" data-bank="${bank.id}">隨機出題</button>
+          <button class="btn-primary" data-action="start" data-bank="${bank.id}">開始測驗 →</button>
+        </div>
+      </div>
+    </article>`).join('');
+
+  root.innerHTML = `
+    <div class="app-shell">
+      <header class="site-header">
+        <div class="brand">
+          <span class="brand-mark">目</span>
+          <div><h1>題庫測驗</h1><p class="tagline">期中考練習．行銷學</p></div>
+        </div>
+        <div class="toolbar">${themeBtn()}</div>
+      </header>
+      <main>
+        <p class="catalog-note">目前共 ${QUESTION_BANKS.length} 個題庫，持續新增中——點選任一題庫開始作答。</p>
+        <div class="catalog-grid">
+          ${cards}
+          <div class="bank-card bank-card-empty"><p>更多題庫<br>陸續加入中</p></div>
+        </div>
+      </main>
+    </div>`;
+}
+
+function renderQuiz(){
+  const bank = getCurrentBank();
+  const qIdx = state.order[state.idx];
+  const q = bank.questions[qIdx];
+  const optOrder = state.qOptOrder[qIdx];
+  const answeredPos = state.answers[qIdx];
+  const total = state.order.length;
+  const answeredCount = state.order.filter(qi => state.answers[qi] != null).length;
+  const letters = ['Ａ','Ｂ','Ｃ','Ｄ','Ｅ'];
+
+  const optionsHtml = optOrder.map((origIdx, pos) => {
+    const opt = q.options[origIdx];
+    const isCorrect = answerSet(q).includes(origIdx);
+    let cls = 'option';
+    let bubble = '◯';
+    let tag = '';
+    if (answeredPos != null){
+      if (pos === answeredPos){ bubble = '●'; cls += isCorrect ? ' is-correct' : ' is-incorrect'; }
+      else if (isCorrect){ bubble = '✓'; cls += ' is-correct'; }
+      else { cls += ' is-dim'; }
+      if (isCorrect) tag = '<span class="tag">正解</span>';
+      else if (pos === answeredPos) tag = '<span class="tag">你的答案</span>';
+    }
+    return `<button class="${cls}" data-action="answer" data-pos="${pos}" ${answeredPos!=null?'disabled':''}>
+      <span class="bubble">${bubble}</span>
+      <span class="option-letter">${letters[pos]}</span>
+      <span class="option-text">${escapeHtml(opt)}</span>
+      ${tag}
+    </button>`;
+  }).join('');
+
+  const gridCells = state.order.map((qi, pos) => {
+    let cls = 'cell';
+    if (pos === state.idx) cls += ' is-current';
+    const ans = state.answers[qi];
+    if (ans != null){
+      cls += isCorrectPos(bank.questions[qi], state.qOptOrder[qi], ans) ? ' is-correct' : ' is-incorrect';
+    }
+    return `<button class="${cls}" data-action="jump" data-pos="${pos}" aria-label="第${pos+1}題">${pos+1}</button>`;
+  }).join('');
+
+  root.innerHTML = `
+    <div class="app-shell">
+      <header class="quiz-header">
+        <div class="quiz-title">
+          <button class="link-btn" data-action="home" style="display:block;margin-bottom:6px">← 題庫首頁</button>
+          <h1>${escapeHtml(bank.subject)}</h1>
+          <p class="quiz-meta">代號 ${escapeHtml(bank.code)}．第 ${state.idx+1} / ${total} 題${state.wrongOnly ? '（錯題重練）' : ''}</p>
+        </div>
+        <div class="toolbar">${themeBtn()}</div>
+      </header>
+
+      <div class="mode-row">
+        <button class="mode-btn ${state.shuffleQ ? 'is-active' : ''}" data-action="toggle-shuffle-q">${ICON_SHUFFLE}隨機出題</button>
+        <button class="mode-btn ${state.shuffleO ? 'is-active' : ''}" data-action="toggle-shuffle-o">${ICON_LIST}選項打亂</button>
+        <button class="mode-btn" data-action="restart">${ICON_RESTART}重新開始</button>
+      </div>
+
+      <div class="progress-bar"><div class="progress-fill" style="width:${total ? (answeredCount/total*100) : 0}%"></div></div>
+
+      <main class="question-card" aria-live="polite">
+        <div class="question-num">${String(state.idx+1).padStart(2,'0')}</div>
+        <p class="question-text">${escapeHtml(q.q)}</p>
+        <div class="options" role="group" aria-label="作答選項">${optionsHtml}</div>
+      </main>
+
+      <nav class="quiz-nav">
+        <button class="btn-ghost" data-action="prev" ${state.idx===0?'disabled':''}>← 上一題</button>
+        <button class="link-btn" data-action="finish">查看成績</button>
+        <button class="btn-ghost" data-action="next" ${state.idx===total-1?'disabled':''}>下一題 →</button>
+      </nav>
+
+      <section class="grid-nav">
+        <h2>題盤導覽．已作答 ${answeredCount} / ${total}</h2>
+        <div class="grid-nav-cells">${gridCells}</div>
+      </section>
+    </div>`;
+}
+
+function renderResults(){
+  const bank = getCurrentBank();
+  const total = state.order.length;
+  let correct = 0;
+  const wrongList = [];
+  state.order.forEach(qi => {
+    const ans = state.answers[qi];
+    if (ans != null && isCorrectPos(bank.questions[qi], state.qOptOrder[qi], ans)) correct++;
+    else wrongList.push(qi);
+  });
+  const pct = total ? Math.round(correct/total*100) : 0;
+  const letters = ['Ａ','Ｂ','Ｃ','Ｄ','Ｅ'];
+
+  const reviewHtml = wrongList.length ? `
+    <section class="review">
+      <h2>錯題回顧</h2>
+      <ul class="review-list">
+        ${wrongList.map(qi => {
+          const q = bank.questions[qi];
+          const optOrder = state.qOptOrder[qi];
+          const ans = state.answers[qi];
+          const correctPos = optOrder.findIndex(oi => answerSet(q).includes(oi));
+          const userText = ans != null ? `${letters[ans]}、${escapeHtml(q.options[optOrder[ans]])}` : '未作答';
+          const correctText = answerSet(q).length > 1
+            ? answerSet(q).map(oi => escapeHtml(q.options[oi])).join('　或　')
+            : `${letters[correctPos]}、${escapeHtml(q.options[optOrder[correctPos]])}`;
+          return `<li>
+            <p class="review-q">${String(qi+1).padStart(2,'0')}. ${escapeHtml(q.q)}</p>
+            <p class="review-a">你的答案：${userText}</p>
+            <p class="review-correct">正解：${correctText}</p>
+          </li>`;
+        }).join('')}
+      </ul>
+    </section>` : `<p class="all-correct">全部答對，太厲害了！</p>`;
+
+  root.innerHTML = `
+    <div class="app-shell">
+      <header class="quiz-header">
+        <div class="quiz-title">
+          <button class="link-btn" data-action="home" style="display:block;margin-bottom:6px">← 題庫首頁</button>
+          <h1>${escapeHtml(bank.subject)}</h1>
+          <p class="quiz-meta">代號 ${escapeHtml(bank.code)}．測驗結果</p>
+        </div>
+        <div class="toolbar">${themeBtn()}</div>
+      </header>
+      <main class="results-main">
+        <div class="score-stamp">
+          <div class="score-stamp-ring"><span class="score-num">${correct}</span><span class="score-slash">/</span><span class="score-total">${total}</span></div>
+          <p class="score-pct">答對率 ${pct}%</p>
+        </div>
+        <div class="results-actions">
+          <button class="btn-primary" data-action="restart">重新測驗</button>
+          ${wrongList.length ? `<button class="btn-ghost" data-action="retry-wrong">只練錯題（${wrongList.length}）</button>` : ''}
+          <button class="btn-ghost" data-action="home">返回題庫首頁</button>
+        </div>
+        ${reviewHtml}
+      </main>
+    </div>`;
+}
+
+function renderShort(){
+  const bank = getCurrentBank();
+  const items = bank.shortAnswers || [];
+  const allOpen = items.length > 0 && items.every((_, i) => state.shortOpen[i]);
+  const cards = items.map((it, i) => {
+    const open = !!state.shortOpen[i];
+    return `
+      <article class="question-card short-card">
+        <div class="question-num">${String(i+1).padStart(2,'0')}</div>
+        <p class="question-text">${escapeHtml(it.q)}</p>
+        <button class="btn-ghost short-toggle ${open ? 'is-active' : ''}" data-action="toggle-short" data-idx="${i}">${open ? '收合參考答案' : '顯示參考答案'}</button>
+        ${open ? `<div class="short-answer"><span class="short-answer-label">參考答案</span><p>${escapeHtml(it.a)}</p></div>` : ''}
+      </article>`;
+  }).join('');
+
+  root.innerHTML = `
+    <div class="app-shell">
+      <header class="quiz-header">
+        <div class="quiz-title">
+          <button class="link-btn" data-action="home" style="display:block;margin-bottom:6px">← 題庫首頁</button>
+          <h1>${escapeHtml(bank.subject)}</h1>
+          <p class="quiz-meta">代號 ${escapeHtml(bank.code)}．簡答題 ${items.length} 題</p>
+        </div>
+        <div class="toolbar">${themeBtn()}</div>
+      </header>
+      <div class="mode-row">
+        <button class="mode-btn ${allOpen ? 'is-active' : ''}" data-action="toggle-short-all">${allOpen ? '全部收合' : '全部展開'}</button>
+      </div>
+      ${cards}
+    </div>`;
+}
+
+function render(){
+  if (state.view === 'home') renderHome();
+  else if (state.view === 'short') renderShort();
+  else if (state.view === 'quiz') renderQuiz();
+  else if (state.view === 'results') renderResults();
+}
+
+/* ============ EVENTS (delegated, attached once) ============ */
+root.addEventListener('click', e => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const action = btn.dataset.action;
+  if (action === 'home') goHome();
+  else if (action === 'start') startQuiz(btn.dataset.bank, { shuffleQ:false, shuffleO:false });
+  else if (action === 'start-shuffle') startQuiz(btn.dataset.bank, { shuffleQ:true, shuffleO:false });
+  else if (action === 'answer') selectOption(Number(btn.dataset.pos));
+  else if (action === 'prev') goPrev();
+  else if (action === 'next') goNext();
+  else if (action === 'finish') finishQuiz();
+  else if (action === 'jump') jumpTo(Number(btn.dataset.pos));
+  else if (action === 'restart') restartQuiz();
+  else if (action === 'retry-wrong') retryWrong();
+  else if (action === 'toggle-theme') toggleTheme();
+  else if (action === 'toggle-shuffle-q') toggleShuffleQ();
+  else if (action === 'toggle-shuffle-o') toggleShuffleO();
+  else if (action === 'short') startShort(btn.dataset.bank);
+  else if (action === 'toggle-short') toggleShort(Number(btn.dataset.idx));
+  else if (action === 'toggle-short-all') toggleShortAll();
+});
+
+document.addEventListener('keydown', e => {
+  if (state.view !== 'quiz') return;
+  const key = e.key.toLowerCase();
+  const digitMap = {'1':0,'2':1,'3':2,'4':3,'5':4};
+  const letterMap = {'a':0,'b':1,'c':2,'d':3,'e':4};
+  if (key in digitMap) selectOption(digitMap[key]);
+  else if (key in letterMap) selectOption(letterMap[key]);
+  else if (e.key === 'ArrowRight') goNext();
+  else if (e.key === 'ArrowLeft') goPrev();
+});
+
+render();
+</script>
+</body>
+</html>
